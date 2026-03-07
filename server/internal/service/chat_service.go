@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/cashyalla/aquaverse/internal/domain"
+	"github.com/cashyalla/aquaverse/internal/notification"
 	"github.com/cashyalla/aquaverse/internal/repository"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
@@ -24,13 +25,15 @@ type ChatHub struct {
 	mu       sync.RWMutex
 	rdb      *redis.Client
 	chatRepo *repository.ChatRepository
+	fcm      *notification.FCMService
 }
 
-func NewChatHub(rdb *redis.Client, chatRepo *repository.ChatRepository) *ChatHub {
+func NewChatHub(rdb *redis.Client, chatRepo *repository.ChatRepository, fcm *notification.FCMService) *ChatHub {
 	return &ChatHub{
 		rooms:    make(map[int64]map[*ChatClient]bool),
 		rdb:      rdb,
 		chatRepo: chatRepo,
+		fcm:      fcm,
 	}
 }
 
@@ -113,5 +116,23 @@ func (h *ChatHub) SendMessage(ctx context.Context, roomID int64, senderID uuid.U
 	}
 	data, _ := json.Marshal(wsMsg)
 	h.Broadcast(ctx, roomID, data)
+
+	// 상대방에게 FCM 푸시 알림 전송
+	if h.fcm != nil {
+		go func() {
+			var recipientID string
+			// trade_id로 seller_id, buyer_id 조회 후 sender가 아닌 쪽에 알림
+			h.chatRepo.DB().QueryRowContext(context.Background(), `
+				SELECT CASE WHEN t.buyer_id = $1::uuid THEN t.seller_id::text ELSE t.buyer_id::text END
+				FROM chat_rooms cr
+				JOIN trades t ON t.id = cr.trade_id
+				WHERE cr.id = $2
+			`, senderID.String(), roomID).Scan(&recipientID)
+			if recipientID != "" && recipientID != senderID.String() {
+				h.fcm.NotifyChatMessage(context.Background(), recipientID, "상대방", content, roomID)
+			}
+		}()
+	}
+
 	return msg, nil
 }

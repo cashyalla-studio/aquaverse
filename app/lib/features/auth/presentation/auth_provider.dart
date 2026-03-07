@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/fcm_service.dart';
 import '../data/auth_repository.dart';
 import '../domain/auth_model.dart';
 
@@ -44,8 +45,9 @@ class AuthState {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
+  final Ref _ref;
 
-  AuthNotifier(this._repository) : super(const AuthState()) {
+  AuthNotifier(this._repository, this._ref) : super(const AuthState()) {
     init();
   }
 
@@ -81,6 +83,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       // Notify GoRouter listeners
       _authNotifier.notifyListeners();
+      // FCM 토큰 등록 (firebase_messaging 패키지 추가 후 활성화)
+      FCMService.registerToken(_ref, user?.locale ?? 'ko').ignore();
     } on Exception catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -155,5 +159,5 @@ final authChangeNotifierProvider = Provider<AuthChangeNotifier>((_) => _authNoti
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final repository = ref.watch(authRepositoryProvider);
-  return AuthNotifier(repository);
+  return AuthNotifier(repository, ref);
 });

@@ -96,6 +96,9 @@ func main() {
 	// ── 사기 탐지기 ───────────────────────────────────────
 	fraudDetector := marketplace.NewFraudDetector(redisCache)
 
+	// ── FCM 직접 전송 서비스 (DB 토큰 기반) ───────────────
+	fcmSvc := notification.NewFCMService(db)
+
 	// ── 알림 서비스 ───────────────────────────────────────
 	notifySvc := notification.NewService(cfg.Notification.FCMServerKey, redisCache, logger)
 
@@ -111,11 +114,11 @@ func main() {
 	mktSvc := service.NewMarketplaceService(mktRepo, notifySvc, fraudDetector)
 
 	// ChatHub: Redis Pub/Sub 기반 실시간 채팅
-	chatHub := service.NewChatHub(rdb, chatRepo)
+	chatHub := service.NewChatHub(rdb, chatRepo, fcmSvc)
 	go chatHub.StartSubscriber(appCtx)
 
 	// 에스크로 서비스
-	escrowSvc := service.NewEscrowService(db)
+	escrowSvc := service.NewEscrowService(db, fcmSvc)
 
 	// 합사 호환성 서비스
 	compatSvc := service.NewCompatibilityService(db)
@@ -172,10 +175,17 @@ func main() {
 	paymentSvc := service.NewPaymentService(db)
 	paymentH := handler.NewPaymentHandler(paymentSvc)
 
+	// 업체 프로필 서비스 및 핸들러
+	businessSvc := service.NewBusinessService(db)
+	businessH := handler.NewBusinessHandler(businessSvc)
+
+	// FCM 알림 핸들러
+	notifH := handler.NewNotificationHandler(fcmSvc)
+
 	// ── Echo 라우터 설정 ───────────────────────────────────
 	e := echo.New()
 	e.HideBanner = true
-	router.Setup(e, cfg, authH, fishH, commH, mktH, uploadH, chatH, phoneH, metricsH, citesH, escrowH, compatH, tankDoctorH, paymentH)
+	router.Setup(e, cfg, authH, fishH, commH, mktH, uploadH, chatH, phoneH, metricsH, citesH, escrowH, compatH, tankDoctorH, paymentH, businessH, notifH)
 	router.SetupHealthCheck(e, db, rdb)
 
 	// ── 그레이스풀 셧다운 ──────────────────────────────────

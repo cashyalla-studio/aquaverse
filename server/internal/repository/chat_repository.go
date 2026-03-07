@@ -15,6 +15,11 @@ func NewChatRepository(db *sqlx.DB) *ChatRepository {
 	return &ChatRepository{db: db}
 }
 
+// DB returns the underlying sqlx.DB instance.
+func (r *ChatRepository) DB() *sqlx.DB {
+	return r.db
+}
+
 func (r *ChatRepository) GetOrCreateRoom(ctx context.Context, tradeID, buyerID, sellerID interface{}) (*domain.ChatRoom, error) {
 	room := &domain.ChatRoom{}
 	err := r.db.GetContext(ctx, room, `SELECT * FROM chat_rooms WHERE trade_id=$1`, tradeID)

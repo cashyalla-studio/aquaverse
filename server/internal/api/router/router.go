@@ -30,6 +30,8 @@ func Setup(
 	compatH *handler.CompatibilityHandler,
 	tankDoctorH *handler.TankDoctorHandler,
 	paymentH *handler.PaymentHandler,
+	businessH *handler.BusinessHandler,
+	notifH *handler.NotificationHandler,
 ) {
 	// 글로벌 미들웨어
 	e.Use(echomw.Logger())
@@ -136,6 +138,25 @@ func Setup(
 	// ── 파일 업로드 (인증 필요) ─────────────────────────────
 	upload := api.Group("/upload", middleware.JWTAuth(cfg.Auth.JWTSecret))
 	upload.POST("/presign", uploadH.PresignUpload)
+
+	// ── 업체 프로필 ────────────────────────────────────────
+	// 공개 조회
+	businesses := api.Group("/businesses")
+	businesses.GET("", businessH.ListBusinesses)
+	businesses.GET("/nearby", businessH.NearbyBusinesses)
+	businesses.GET("/:id", businessH.GetBusiness)
+	businesses.GET("/:id/reviews", businessH.GetReviews)
+
+	// 업체 등록/수정/리뷰 (인증 필요)
+	authBusinesses := businesses.Group("", middleware.JWTAuth(cfg.Auth.JWTSecret))
+	authBusinesses.POST("", businessH.CreateBusiness)
+	authBusinesses.PUT("/:id", businessH.UpdateBusiness)
+	authBusinesses.POST("/:id/reviews", businessH.AddReview)
+
+	// ── 푸시 알림 (FCM 토큰 관리) ─────────────────────────
+	notif := api.Group("/notifications", middleware.JWTAuth(cfg.Auth.JWTSecret))
+	notif.POST("/fcm/register", notifH.RegisterToken)
+	notif.DELETE("/fcm/unregister", notifH.UnregisterToken)
 
 	// ── 관리자 (ADMIN 역할 필요) ───────────────────────────
 	admin := api.Group("/admin",

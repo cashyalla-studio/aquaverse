@@ -26,6 +26,9 @@ const TradeChat = lazy(() => import('./pages/trade/TradeChat'))
 const PhoneVerify = lazy(() => import('./pages/auth/PhoneVerify'))
 const FishCompatibility = lazy(() => import('./pages/fish/FishCompatibility'))
 const TankDoctorPage = lazy(() => import('./pages/tanks/TankDoctorPage'))
+const BusinessList = lazy(() => import('./pages/business/BusinessList'))
+const BusinessDetail = lazy(() => import('./pages/business/BusinessDetail'))
+const MapPage = lazy(() => import('./pages/map/MapPage'))
 
 const Spinner = () => (
   <div className="flex h-64 items-center justify-center">
@@ -77,6 +80,9 @@ export default function App() {
                     </PrivateRoute>
                   }
                 />
+                <Route path="/businesses" element={<BusinessList />} />
+                <Route path="/businesses/:id" element={<BusinessDetail />} />
+                <Route path="/map" element={<MapPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route
