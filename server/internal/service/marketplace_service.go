@@ -5,17 +5,10 @@ import (
 	"errors"
 
 	"github.com/cashyalla/aquaverse/internal/domain"
-	)
+	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
+)
 
-// ListingFilter and ListingListResult moved to domain package
-
-type _ListingListResult struct {
-	Items      []domain.Listing `json:"items"`
-	TotalCount int              `json:"total_count"`
-	Page       int              `json:"page"`
-	Limit      int              `json:"limit"`
-}
-// (replaced with domain.ListingListResult)
 
 type CreateListingRequest struct {
 	SellerID        string
@@ -244,9 +237,10 @@ func (s *MarketplaceService) InitiateTrade(ctx context.Context, req InitiateTrad
 		return nil, errors.New("listing is not available")
 	}
 
+	buyerUUID, _ := uuid.Parse(req.BuyerID)
 	trade := &domain.Trade{
 		ListingID:     req.ListingID,
-		BuyerID:       req.BuyerID,
+		BuyerID:       buyerUUID,
 		AgreedPrice:   listing.Price,
 		Currency:      listing.Currency,
 		TradeType:     req.TradeType,
