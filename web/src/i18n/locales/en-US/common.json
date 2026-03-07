@@ -68,6 +68,29 @@
     "goHome": "Go to Home",
     "retry": "Re-enter number"
   },
+  "escrow": {
+    "title": "Secure Payment (Escrow)",
+    "pending": "Awaiting Escrow",
+    "funded": "Held in Escrow",
+    "released": "Payment Released",
+    "refunded": "Refund Completed",
+    "disputed": "Under Dispute",
+    "fund": "Deposit to Escrow",
+    "release": "Confirm Receipt → Release Payment",
+    "refund": "Request Refund",
+    "description": "The platform securely holds the payment and releases it to the seller upon trade completion."
+  },
+  "cites": {
+    "blocked": "CITES Protected Species — Trade Blocked",
+    "warning": "CITES Protected Species — Caution Required",
+    "invasiveKr": "Invasive Species in Korea — Illegal to Release into the Wild"
+  },
+  "pwa": {
+    "installTitle": "Install AquaVerse",
+    "installDesc": "Add to home screen and use like an app",
+    "later": "Later",
+    "install": "Install"
+  },
   "fish": {
     "scientific_name": "Scientific Name",
     "common_name": "Common Name",

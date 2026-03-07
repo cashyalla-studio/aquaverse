@@ -24,9 +24,13 @@ func Setup(
 	uploadH *handler.UploadHandler,
 	chatH *handler.ChatHandler,
 	phoneH *handler.PhoneHandler,
+	metricsH *handler.MetricsHandler,
+	citesH *handler.CitesHandler,
+	escrowH *handler.EscrowHandler,
 ) {
 	// 글로벌 미들웨어
 	e.Use(echomw.Logger())
+	e.Use(middleware.PrometheusMetrics())
 	e.Use(echomw.Recover())
 	e.Use(echomw.CORS())
 	e.Use(echomw.RequestID())
@@ -36,6 +40,9 @@ func Setup(
 	e.GET("/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"status": "ok", "version": "1.0.0"})
 	})
+
+	// /metrics (Prometheus scraping, 프로덕션에서는 IP 필터 권장)
+	e.GET("/metrics", metricsH.Metrics)
 
 	api := e.Group("/api/v1")
 
@@ -83,6 +90,16 @@ func Setup(
 	// WebSocket 채팅
 	trades.GET("/:id/chat", chatH.Connect)
 	trades.GET("/:id/chat/history", chatH.GetHistory)
+
+	// 에스크로
+	escrow := trades.Group("/:id/escrow")
+	escrow.GET("", escrowH.GetStatus)
+	escrow.POST("/fund", escrowH.Fund)
+	escrow.POST("/release", escrowH.Release)
+	escrow.POST("/refund", escrowH.Refund)
+
+	// CITES 멸종위기 어종 체크 (공개)
+	api.GET("/cites/check", citesH.Check)
 
 	// 전화번호 인증
 	phone := api.Group("/phone", middleware.JWTAuth(cfg.Auth.JWTSecret))

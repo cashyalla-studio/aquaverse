@@ -33,8 +33,9 @@ class ListingRepository {
     });
   }
 
-  Future<void> initiateTrade(int listingId) async {
-    await _dio.post('/trades', data: {'listing_id': listingId});
+  Future<int?> initiateTrade(int listingId) async {
+    final resp = await _dio.post('/trades', data: {'listing_id': listingId});
+    return resp.data?['id'] as int?;
   }
 }
 

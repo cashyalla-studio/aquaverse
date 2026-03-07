@@ -1,0 +1,32 @@
+name: CD — Deploy to Staging
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [master, main]
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    environment:
+      name: staging
+      url: ${{ secrets.STAGING_URL }}
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /opt/aquaverse
+            docker stack deploy \
+              -c infra/docker-stack.yml \
+              --with-registry-auth \
+              aquaverse
+            docker service update --image ${{ secrets.REGISTRY_HOST }}/aquaverse/api:${{ github.sha }} aquaverse_api
+            docker service update --image ${{ secrets.REGISTRY_HOST }}/aquaverse/web:${{ github.sha }} aquaverse_web
+            echo "Deployed SHA: ${{ github.sha }}"

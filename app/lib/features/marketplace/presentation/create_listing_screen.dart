@@ -7,6 +7,7 @@ import '../../fish/data/fish_repository.dart';
 import '../../fish/domain/fish_model.dart';
 import '../data/listing_repository.dart';
 import '../domain/listing_model.dart';
+import 'cites_warning_widget.dart';
 
 class CreateListingScreen extends ConsumerStatefulWidget {
   const CreateListingScreen({super.key});
@@ -282,6 +283,7 @@ class _Step1FishSelectState extends ConsumerState<_Step1FishSelect> {
                     ],
                   ),
                 ),
+                CitesWarningWidget(scientificName: widget.selected!.scientificName),
               ],
             ],
           ),

@@ -93,5 +93,23 @@
   "phoneVerify": "인증 확인",
   "phoneVerifyDone": "인증 완료!",
   "phoneVerifyDoneSubtitle": "이제 제한 없이 거래하실 수 있습니다",
-  "phoneRetry": "번호 다시 입력"
+  "phoneRetry": "번호 다시 입력",
+  "escrowTitle": "안전결제 (에스크로)",
+  "escrowPending": "에스크로 대기",
+  "escrowFunded": "에스크로 보관 중",
+  "escrowReleased": "대금 지급 완료",
+  "escrowRefunded": "환불 완료",
+  "escrowDisputed": "분쟁 중",
+  "escrowFund": "에스크로 입금",
+  "escrowRelease": "수령 확인",
+  "escrowRefund": "환불 요청",
+  "escrowDescription": "플랫폼이 대금을 안전하게 보관하고 거래 완료 후 판매자에게 지급합니다.",
+  "citesBlocked": "CITES 보호종 — 거래 차단",
+  "citesWarning": "CITES 부속서 {appendix} 보호종",
+  "@citesWarning": {
+    "placeholders": {
+      "appendix": { "type": "String" }
+    }
+  },
+  "citesInvasiveKr": "한국 생태계 교란종 — 자연 방류 시 불법"
 }

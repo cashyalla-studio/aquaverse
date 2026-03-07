@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0ea5e9"/>
+  <!-- Water waves -->
+  <path d="M0 320 Q128 280 256 320 Q384 360 512 320 L512 512 L0 512 Z" fill="#0284c7" opacity="0.6"/>
+  <path d="M0 370 Q128 330 256 370 Q384 410 512 370 L512 512 L0 512 Z" fill="#0369a1" opacity="0.5"/>
+  <!-- Fish body -->
+  <ellipse cx="240" cy="240" rx="110" ry="70" fill="#ffffff"/>
+  <!-- Fish tail -->
+  <polygon points="350,240 420,180 420,300" fill="#ffffff"/>
+  <!-- Fish eye -->
+  <circle cx="170" cy="220" r="18" fill="#0ea5e9"/>
+  <circle cx="164" cy="214" r="7" fill="#ffffff"/>
+  <!-- Fish fin top -->
+  <path d="M200 170 Q240 130 290 160 Q260 175 230 172 Z" fill="#bae6fd"/>
+  <!-- Fish stripe -->
+  <path d="M200 210 Q220 240 200 270" stroke="#bae6fd" stroke-width="10" fill="none" stroke-linecap="round"/>
+</svg>

@@ -102,5 +102,23 @@
   "phoneVerify": "Verify",
   "phoneVerifyDone": "Verified!",
   "phoneVerifyDoneSubtitle": "You can now trade without restrictions",
-  "phoneRetry": "Re-enter Number"
+  "phoneRetry": "Re-enter Number",
+  "escrowTitle": "Secure Payment (Escrow)",
+  "escrowPending": "Awaiting Escrow",
+  "escrowFunded": "Held in Escrow",
+  "escrowReleased": "Payment Released",
+  "escrowRefunded": "Refunded",
+  "escrowDisputed": "In Dispute",
+  "escrowFund": "Deposit to Escrow",
+  "escrowRelease": "Confirm Receipt",
+  "escrowRefund": "Request Refund",
+  "escrowDescription": "The platform securely holds the payment and releases it to the seller after the trade is complete.",
+  "citesBlocked": "CITES Protected Species — Trade Blocked",
+  "citesWarning": "CITES Appendix {appendix} Protected Species",
+  "@citesWarning": {
+    "placeholders": {
+      "appendix": { "type": "String" }
+    }
+  },
+  "citesInvasiveKr": "Invasive Species in Korea — Illegal to Release into the Wild"
 }

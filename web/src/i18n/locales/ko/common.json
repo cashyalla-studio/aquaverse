@@ -68,6 +68,29 @@
     "goHome": "홈으로 이동",
     "retry": "번호 다시 입력"
   },
+  "escrow": {
+    "title": "안전결제 (에스크로)",
+    "pending": "에스크로 대기",
+    "funded": "에스크로 보관 중",
+    "released": "대금 지급 완료",
+    "refunded": "환불 완료",
+    "disputed": "분쟁 중",
+    "fund": "에스크로 입금",
+    "release": "수령 확인 → 대금 지급",
+    "refund": "환불 요청",
+    "description": "플랫폼이 대금을 안전하게 보관하고 거래 완료 후 판매자에게 지급합니다."
+  },
+  "cites": {
+    "blocked": "CITES 보호종 — 거래 차단",
+    "warning": "CITES 보호종 — 주의 필요",
+    "invasiveKr": "한국 생태계 교란종 — 자연 방류 시 불법"
+  },
+  "pwa": {
+    "installTitle": "AquaVerse 설치",
+    "installDesc": "홈 화면에 추가하고 앱처럼 사용하세요",
+    "later": "나중에",
+    "install": "설치"
+  },
   "fish": {
     "scientific_name": "학명",
     "common_name": "일반명",

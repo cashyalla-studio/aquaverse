@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/listing_repository.dart';
 import '../domain/listing_model.dart';
+import 'escrow_panel_widget.dart';
 
 final listingDetailProvider = FutureProvider.family<ListingDetail, Map<String, dynamic>>((ref, params) {
   final id = params['id'] as int;
@@ -31,22 +32,31 @@ class ListingDetailScreen extends ConsumerWidget {
         appBar: AppBar(title: const Text('Error')),
         body: Center(child: Text(l10n.commonError)),
       ),
-      data: (listing) => _ListingDetailView(listing: listing, l10n: l10n, locale: locale, ref: ref),
+      data: (listing) => _ListingDetailView(listing: listing, l10n: l10n, locale: locale),
     );
   }
 }
 
-class _ListingDetailView extends StatelessWidget {
+class _ListingDetailView extends ConsumerStatefulWidget {
   final ListingDetail listing;
   final AppLocalizations l10n;
   final String locale;
-  final WidgetRef ref;
   const _ListingDetailView({
     required this.listing,
     required this.l10n,
     required this.locale,
-    required this.ref,
   });
+
+  @override
+  ConsumerState<_ListingDetailView> createState() => _ListingDetailViewState();
+}
+
+class _ListingDetailViewState extends ConsumerState<_ListingDetailView> {
+  int? _tradeId;
+
+  ListingDetail get listing => widget.listing;
+  AppLocalizations get l10n => widget.l10n;
+  String get locale => widget.locale;
 
   Color get _healthColor => switch (listing.healthStatus) {
     'EXCELLENT' => const Color(0xFF16A34A),
@@ -71,6 +81,8 @@ class _ListingDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double listingPrice = double.tryParse(listing.priceKrw) ?? 0.0;
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -237,6 +249,14 @@ class _ListingDetailView extends StatelessWidget {
                     ),
                   ],
 
+                  // 에스크로 패널 (tradeId가 있을 때만 표시)
+                  if (_tradeId != null)
+                    EscrowPanelWidget(
+                      tradeId: _tradeId!,
+                      isBuyer: true,
+                      amount: listingPrice,
+                    ),
+
                   // 여름 AquaCourier 경고
                   if (listing.tradeType == 'DIRECT' || listing.tradeType == 'COURIER')
                     Container(
@@ -320,8 +340,9 @@ class _ListingDetailView extends StatelessWidget {
                       Navigator.pop(ctx);
                       final repo = ref.read(listingRepositoryProvider(locale));
                       try {
-                        await repo.initiateTrade(listing.id);
-                        if (context.mounted) {
+                        final newTradeId = await repo.initiateTrade(listing.id);
+                        if (mounted) {
+                          setState(() => _tradeId = newTradeId);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Trade request sent!')),
                           );
