@@ -2,7 +2,7 @@
   "app_name": "아쿠아버스",
   "nav": {
     "home": "홈",
-    "encyclopedia": "어종 도감",
+    "encyclopedia": "생물 도감",
     "community": "커뮤니티",
     "marketplace": "분양마켓",
     "my_tanks": "내 수조",
@@ -105,6 +105,15 @@
     "lifespan": "수명",
     "breeding": "번식",
     "care_notes": "사육 노트",
+    "humidity": "습도",
+    "uv_requirement": "UV 조명",
+    "basking_temp": "일광욕 온도",
+    "colony_size": "군체 크기",
+    "venom_level": "독성",
+    "adult_size": "성체 크기",
+    "legal_status": "법적 지위",
+    "enclosure_type": "사육장 종류",
+    "substrate_type": "바닥재",
     "care_levels": {
       "BEGINNER": "초급",
       "INTERMEDIATE": "중급",
@@ -120,5 +129,14 @@
       "CARNIVORE": "육식",
       "HERBIVORE": "초식"
     }
+  },
+  "categories": {
+    "fish": "열대어",
+    "reptile": "파충류",
+    "amphibian": "양서류",
+    "insect": "곤충",
+    "arachnid": "거미류",
+    "bird": "조류",
+    "mammal": "소동물"
   }
 }

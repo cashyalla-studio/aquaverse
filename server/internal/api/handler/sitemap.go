@@ -41,6 +41,9 @@ func (h *SitemapHandler) Sitemap(c echo.Context) error {
   <url><loc>` + baseURL + `/fish</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>` + baseURL + `/marketplace</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>` + baseURL + `/community</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>` + baseURL + `/species/reptile</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>` + baseURL + `/species/amphibian</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>` + baseURL + `/species/insect</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 `
 
 	if result != nil {

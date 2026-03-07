@@ -2,7 +2,7 @@
   "app_name": "AquaVerse",
   "nav": {
     "home": "Home",
-    "encyclopedia": "Fish Encyclopedia",
+    "encyclopedia": "Species Encyclopedia",
     "community": "Community",
     "marketplace": "Adoption Market",
     "my_tanks": "My Tanks",
@@ -105,6 +105,15 @@
     "lifespan": "Lifespan",
     "breeding": "Breeding",
     "care_notes": "Care Notes",
+    "humidity": "Humidity",
+    "uv_requirement": "UV Lighting",
+    "basking_temp": "Basking Temperature",
+    "colony_size": "Colony Size",
+    "venom_level": "Venom Level",
+    "adult_size": "Adult Size",
+    "legal_status": "Legal Status",
+    "enclosure_type": "Enclosure Type",
+    "substrate_type": "Substrate",
     "care_levels": {
       "BEGINNER": "Beginner",
       "INTERMEDIATE": "Intermediate",
@@ -120,5 +129,14 @@
       "CARNIVORE": "Carnivore",
       "HERBIVORE": "Herbivore"
     }
+  },
+  "categories": {
+    "fish": "Tropical Fish",
+    "reptile": "Reptiles",
+    "amphibian": "Amphibians",
+    "insect": "Insects",
+    "arachnid": "Arachnids",
+    "bird": "Birds",
+    "mammal": "Small Mammals"
   }
 }

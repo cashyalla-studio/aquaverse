@@ -43,6 +43,15 @@
     "lifespan": "متوسط العمر",
     "breeding": "التكاثر",
     "care_notes": "ملاحظات الرعاية",
+    "humidity": "الرطوبة",
+    "uv_requirement": "إضاءة الأشعة فوق البنفسجية",
+    "basking_temp": "درجة حرارة التشمس",
+    "colony_size": "حجم المستعمرة",
+    "venom_level": "مستوى السمية",
+    "adult_size": "الحجم البالغ",
+    "legal_status": "الوضع القانوني",
+    "enclosure_type": "نوع الحظيرة",
+    "substrate_type": "نوع الركيزة",
     "care_levels": {
       "BEGINNER": "مبتدئ",
       "INTERMEDIATE": "متوسط",
@@ -58,5 +67,14 @@
       "CARNIVORE": "آكل لحوم",
       "HERBIVORE": "آكل نباتات"
     }
+  },
+  "categories": {
+    "fish": "أسماك استوائية",
+    "reptile": "زواحف",
+    "amphibian": "برمائيات",
+    "insect": "حشرات",
+    "arachnid": "عنكبوتيات",
+    "bird": "طيور",
+    "mammal": "حيوانات صغيرة"
   }
 }
