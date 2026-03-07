@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Search, Filter, Droplets, Thermometer, Ruler } from 'lucide-react'
 import { fishApi, type FishListItem } from '../api/fish'
 import { clsx } from 'clsx'
+import { events } from '../lib/posthog'
 
 const CARE_LEVELS = ['BEGINNER', 'INTERMEDIATE', 'EXPERT'] as const
 const CARE_COLORS = {
@@ -33,6 +34,14 @@ export default function FishEncyclopedia() {
     queryFn: () => fishApi.families().then((r) => r.data),
     staleTime: 60 * 60 * 1000,
   })
+
+  const prevSearchRef = useRef('')
+  useEffect(() => {
+    if (data && search && search !== prevSearchRef.current) {
+      prevSearchRef.current = search
+      events.searchPerformed(search, data.items.length)
+    }
+  }, [data, search])
 
   return (
     <div>

@@ -31,6 +31,9 @@ const BusinessDetail = lazy(() => import('./pages/business/BusinessDetail'))
 const MapPage = lazy(() => import('./pages/map/MapPage'))
 const VideoFeed = lazy(() => import('./pages/video/VideoFeed'))
 const SubscriptionPage = lazy(() => import('./pages/subscription/SubscriptionPage'))
+const SocialFeed = lazy(() => import('./pages/social/Feed'))
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'))
 
 const Spinner = () => (
   <div className="flex h-64 items-center justify-center">
@@ -87,6 +90,30 @@ export default function App() {
                 <Route path="/map" element={<MapPage />} />
                 <Route path="/videos" element={<VideoFeed />} />
                 <Route path="/subscription" element={<SubscriptionPage />} />
+                <Route
+                  path="/feed"
+                  element={
+                    <PrivateRoute>
+                      <SocialFeed />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <PrivateRoute>
+                      <AdminDashboard />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <PrivateRoute>
+                      <AdminUsers />
+                    </PrivateRoute>
+                  }
+                />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route

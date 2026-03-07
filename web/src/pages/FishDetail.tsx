@@ -1,9 +1,11 @@
+import { useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Droplets, Thermometer, Ruler, Clock, AlertTriangle } from 'lucide-react'
 import { fishApi } from '../api/fish'
 import { clsx } from 'clsx'
+import { events } from '../lib/posthog'
 
 export default function FishDetail() {
   const { id } = useParams<{ id: string }>()
@@ -14,6 +16,21 @@ export default function FishDetail() {
     queryFn: () => fishApi.get(Number(id), i18n.language).then((r) => r.data),
     enabled: !!id,
   })
+
+  useEffect(() => {
+    if (fish) {
+      const displayName = fish.translation?.common_name || fish.primary_common_name
+      events.speciesViewed(fish.id, displayName)
+      document.title = `${displayName} (${fish.scientific_name}) - Finara`
+      let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement
+      if (!meta) {
+        meta = document.createElement('meta')
+        meta.name = 'description'
+        document.head.appendChild(meta)
+      }
+      meta.content = `${displayName} 사육 정보. 수온 ${fish.temp_min_c ?? '?'}~${fish.temp_max_c ?? '?'}°C, pH ${fish.ph_min ?? '?'}~${fish.ph_max ?? '?'}. Finara에서 분양하기.`
+    }
+  }, [fish])
 
   if (isLoading) return (
     <div className="animate-pulse space-y-4">

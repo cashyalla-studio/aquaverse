@@ -190,10 +190,21 @@ func main() {
 	subSvc := service.NewSubscriptionService(db)
 	subH := handler.NewSubscriptionHandler(subSvc)
 
+	// Sitemap 핸들러
+	sitemapH := handler.NewSitemapHandler(fishSvc)
+
+	// 관리자 서비스 및 핸들러
+	adminSvc := service.NewAdminService(db)
+	adminH := handler.NewAdminHandler(adminSvc)
+
+	// 소셜 그래프 서비스 및 핸들러
+	socialSvc := service.NewSocialService(db)
+	socialH := handler.NewSocialHandler(socialSvc)
+
 	// ── Echo 라우터 설정 ───────────────────────────────────
 	e := echo.New()
 	e.HideBanner = true
-	router.Setup(e, cfg, authH, fishH, commH, mktH, uploadH, chatH, phoneH, metricsH, citesH, escrowH, compatH, tankDoctorH, paymentH, businessH, notifH, videoH, subH)
+	router.Setup(e, cfg, rdb, authH, fishH, commH, mktH, uploadH, chatH, phoneH, metricsH, citesH, escrowH, compatH, tankDoctorH, paymentH, businessH, notifH, videoH, subH, sitemapH, adminH, socialH)
 	router.SetupHealthCheck(e, db, rdb)
 
 	// ── 그레이스풀 셧다운 ──────────────────────────────────

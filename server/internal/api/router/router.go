@@ -17,6 +17,7 @@ import (
 func Setup(
 	e *echo.Echo,
 	cfg *config.Config,
+	rdb *redis.Client,
 	authH *handler.AuthHandler,
 	fishH *handler.FishHandler,
 	commH *handler.CommunityHandler,
@@ -34,6 +35,9 @@ func Setup(
 	notifH *handler.NotificationHandler,
 	videoH *handler.VideoHandler,
 	subH *handler.SubscriptionHandler,
+	sitemapH *handler.SitemapHandler,
+	adminH *handler.AdminHandler,
+	socialH *handler.SocialHandler,
 ) {
 	// 글로벌 미들웨어
 	e.Use(echomw.Logger())
@@ -51,12 +55,15 @@ func Setup(
 	// /metrics (Prometheus scraping, 프로덕션에서는 IP 필터 권장)
 	e.GET("/metrics", metricsH.Metrics)
 
+	// Sitemap (SEO)
+	e.GET("/sitemap.xml", sitemapH.Sitemap)
+
 	api := e.Group("/api/v1")
 
 	// ── 인증 (공개) ────────────────────────────────────────
 	auth := api.Group("/auth")
-	auth.POST("/register", authH.Register)
-	auth.POST("/login", authH.Login)
+	auth.POST("/register", authH.Register, middleware.AuthRateLimit(rdb))
+	auth.POST("/login", authH.Login, middleware.AuthRateLimit(rdb))
 	auth.POST("/refresh", authH.Refresh)
 	auth.POST("/logout", authH.Logout)
 	auth.POST("/logout-all", authH.LogoutAll, middleware.JWTAuth(cfg.Auth.JWTSecret))
@@ -184,7 +191,20 @@ func Setup(
 		middleware.JWTAuth(cfg.Auth.JWTSecret),
 		middleware.RequireRole("ADMIN"),
 	)
-	_ = admin // 관리자 핸들러는 별도 구현
+	admin.GET("/kpi", adminH.GetKPI)
+	admin.GET("/users", adminH.ListUsers)
+	admin.POST("/users/:id/ban", adminH.BanUser)
+	admin.POST("/users/:id/unban", adminH.UnbanUser)
+	admin.GET("/audit-logs", adminH.GetAuditLogs)
+	admin.GET("/cites-stats", adminH.GetCitesStats)
+
+	// ── 소셜 그래프 ─────────────────────────────────────
+	social := api.Group("/social", middleware.JWTAuth(cfg.Auth.JWTSecret))
+	social.GET("/feed", socialH.GetFeed)
+	social.GET("/suggestions", socialH.GetSuggestions)
+	social.GET("/following", socialH.GetFollowing)
+	social.POST("/users/:id/follow", socialH.Follow)
+	social.DELETE("/users/:id/follow", socialH.Unfollow)
 }
 
 // SetupHealthCheck DB와 Redis ping을 포함하는 강화된 헬스체크를 등록한다.

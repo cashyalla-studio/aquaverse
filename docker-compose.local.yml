@@ -161,6 +161,9 @@ services:
         # 브라우저가 직접 호스트의 8080으로 요청 (컨테이너 내부가 아닌 브라우저 기준)
         VITE_API_URL: "http://localhost:8080"
     container_name: av_web
+    environment:
+      VITE_POSTHOG_KEY: phc_dev_local_placeholder
+      VITE_POSTHOG_HOST: https://app.posthog.com
     depends_on:
       api:
         condition: service_healthy

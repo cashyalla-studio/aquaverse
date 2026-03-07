@@ -121,8 +121,37 @@ func (r *FishRepository) GetByID(ctx context.Context, id int64, locale domain.Lo
 }
 
 func (r *FishRepository) Search(ctx context.Context, query string, locale domain.Locale) ([]domain.FishListResponse, error) {
+	// FTS 우선: search_vector @@ tsquery
+	ftsQ := `
+		SELECT
+			f.id,
+			f.scientific_name,
+			COALESCE(t.common_name, f.primary_common_name) AS common_name,
+			COALESCE(f.family, '') AS family,
+			f.care_level,
+			f.temperament,
+			f.max_size_cm,
+			f.min_tank_size_liters,
+			f.primary_image_url,
+			f.quality_score
+		FROM fish_data f
+		LEFT JOIN fish_translations t ON t.fish_data_id = f.id AND t.locale = $1
+		WHERE f.publish_status = 'PUBLISHED'
+		  AND f.search_vector @@ to_tsquery('simple', unaccent($2) || ':*')
+		ORDER BY
+			ts_rank(f.search_vector, to_tsquery('simple', unaccent($2) || ':*')) DESC,
+			f.quality_score DESC
+		LIMIT 30
+	`
+	var items []domain.FishListResponse
+	err := r.db.SelectContext(ctx, &items, ftsQ, string(locale), query)
+	if err == nil && len(items) > 0 {
+		return items, nil
+	}
+
+	// ILIKE fallback: FTS 결과가 없거나 search_vector 컬럼이 아직 없을 때
 	like := "%" + query + "%"
-	q := `
+	fallbackQ := `
 		SELECT
 			f.id,
 			f.scientific_name,
@@ -152,9 +181,9 @@ func (r *FishRepository) Search(ctx context.Context, query string, locale domain
 			f.quality_score DESC
 		LIMIT 30
 	`
-	var items []domain.FishListResponse
-	if err := r.db.SelectContext(ctx, &items, q, string(locale), like, query); err != nil {
-		return nil, err
+	items = nil
+	if err2 := r.db.SelectContext(ctx, &items, fallbackQ, string(locale), like, query); err2 != nil {
+		return nil, err2
 	}
 	return items, nil
 }
