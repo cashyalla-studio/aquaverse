@@ -101,8 +101,7 @@ func (r *CommunityRepository) GetPost(ctx context.Context, postID int64) (*domai
 		LIMIT 50
 	`
 	if err := r.db.SelectContext(ctx, &comments, cq, postID); err == nil {
-		post.Replies = nil // Post에 Replies 필드 없음, Comment에 있음
-		_ = comments      // TODO: 응답 구조체에서 활용
+		_ = comments // TODO: 응답 구조체에서 활용
 	}
 
 	return &post, nil
