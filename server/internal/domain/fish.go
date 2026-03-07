@@ -31,6 +31,51 @@ const (
 	DietHerbivore DietType = "HERBIVORE"
 )
 
+// CreatureCategory 생물 카테고리
+type CreatureCategory string
+
+const (
+	CategoryFish      CreatureCategory = "fish"
+	CategoryReptile   CreatureCategory = "reptile"
+	CategoryAmphibian CreatureCategory = "amphibian"
+	CategoryInsect    CreatureCategory = "insect"
+	CategoryArachnid  CreatureCategory = "arachnid"
+	CategoryBird      CreatureCategory = "bird"
+	CategoryMammal    CreatureCategory = "mammal"
+)
+
+// CreatureCategoryInfo 카테고리 정보
+type CreatureCategoryInfo struct {
+	Code      string `db:"code"       json:"code"`
+	NameKo    string `db:"name_ko"    json:"name_ko"`
+	NameEn    string `db:"name_en"    json:"name_en"`
+	IconEmoji string `db:"icon_emoji" json:"icon_emoji"`
+	SortOrder int    `db:"sort_order" json:"sort_order"`
+	IsActive  bool   `db:"is_active"  json:"is_active"`
+}
+
+// SpeciesExtraAttributes 카테고리별 추가 속성
+type SpeciesExtraAttributes struct {
+	FishDataID       int64    `db:"fish_data_id"       json:"fish_data_id"`
+	CreatureCategory string   `db:"creature_category"  json:"creature_category"`
+	HumidityMin      *float64 `db:"humidity_min"       json:"humidity_min,omitempty"`
+	HumidityMax      *float64 `db:"humidity_max"       json:"humidity_max,omitempty"`
+	UVRequirement    *string  `db:"uv_requirement"     json:"uv_requirement,omitempty"`
+	BaskingTempC     *float64 `db:"basking_temp_c"     json:"basking_temp_c,omitempty"`
+	SubstrateType    *string  `db:"substrate_type"     json:"substrate_type,omitempty"`
+	EnclosureType    *string  `db:"enclosure_type"     json:"enclosure_type,omitempty"`
+	ColonySizeMin    *int     `db:"colony_size_min"    json:"colony_size_min,omitempty"`
+	ColonySizeMax    *int     `db:"colony_size_max"    json:"colony_size_max,omitempty"`
+	QueenRequired    bool     `db:"queen_required"     json:"queen_required,omitempty"`
+	VenomLevel       *string  `db:"venom_level"        json:"venom_level,omitempty"`
+	LifespanYearsMin *int     `db:"lifespan_years_min" json:"lifespan_years_min,omitempty"`
+	LifespanYearsMax *int     `db:"lifespan_years_max" json:"lifespan_years_max,omitempty"`
+	AdultSizeCm      *float64 `db:"adult_size_cm"      json:"adult_size_cm,omitempty"`
+	LegalStatusKr    string   `db:"legal_status_kr"    json:"legal_status_kr"`
+	CITESAppendix    *string  `db:"cites_appendix"     json:"cites_appendix,omitempty"`
+	Notes            *string  `db:"notes"              json:"notes,omitempty"`
+}
+
 // PublishStatus 게시 상태
 type PublishStatus string
 
@@ -89,6 +134,9 @@ type FishData struct {
 	License       *string `db:"license"`
 	LicenseURL    *string `db:"license_url"`
 	Attribution   *string `db:"attribution"`
+
+	// 카테고리
+	CreatureCategory string `db:"creature_category" json:"creature_category"`
 
 	// 상태
 	PublishStatus PublishStatus `db:"publish_status"`
@@ -178,6 +226,7 @@ type FishListResponse struct {
 
 // FishFilter 어종 목록 필터
 type FishFilter struct {
+	Category  string
 	Family    string
 	CareLevel string
 	Search    string

@@ -1,5 +1,13 @@
 import { apiClient } from './client'
 
+export interface CreatureCategory {
+  code: string
+  name_ko: string
+  name_en: string
+  icon_emoji: string
+  sort_order: number
+}
+
 export interface FishListItem {
   id: number
   scientific_name: string
@@ -36,6 +44,25 @@ export interface FishDetail {
   primary_image_url?: string
   license?: string
   attribution?: string
+  creature_category?: string
+  extra_attributes?: {
+    humidity_min?: number
+    humidity_max?: number
+    uv_requirement?: string
+    basking_temp_c?: number
+    substrate_type?: string
+    enclosure_type?: string
+    colony_size_min?: number
+    colony_size_max?: number
+    queen_required?: boolean
+    venom_level?: string
+    lifespan_years_min?: number
+    lifespan_years_max?: number
+    adult_size_cm?: number
+    legal_status_kr?: string
+    cites_appendix?: string
+    notes?: string
+  }
   // 번역된 필드 (API가 locale에 맞춰 반환)
   translation?: {
     common_name?: string
@@ -60,13 +87,16 @@ export const fishApi = {
     care_level?: string
     q?: string
     locale?: string
+    category?: string
   }) => apiClient.get<FishListResponse>('/fish', { params }),
 
   get: (id: number, locale?: string) =>
     apiClient.get<FishDetail>(`/fish/${id}`, { params: { locale } }),
 
-  search: (q: string, locale?: string) =>
-    apiClient.get<FishListItem[]>('/fish/search', { params: { q, locale } }),
+  search: (q: string, locale?: string, category?: string) =>
+    apiClient.get<FishListItem[]>('/fish/search', { params: { q, locale, category } }),
 
   families: () => apiClient.get<string[]>('/fish/families'),
+
+  categories: () => apiClient.get<CreatureCategory[]>('/fish/categories'),
 }

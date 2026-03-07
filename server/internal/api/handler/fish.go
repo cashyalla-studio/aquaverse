@@ -35,6 +35,7 @@ func (h *FishHandler) List(c echo.Context) error {
 	}
 
 	filter := domain.FishFilter{
+		Category:  c.QueryParam("category"),
 		Family:    c.QueryParam("family"),
 		CareLevel: c.QueryParam("care_level"),
 		Search:    c.QueryParam("q"),
@@ -95,4 +96,13 @@ func (h *FishHandler) ListFamilies(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, families)
+}
+
+// GET /api/v1/fish/categories
+func (h *FishHandler) ListCategories(c echo.Context) error {
+	cats, err := h.fishSvc.ListCategories(c.Request().Context())
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, cats)
 }

@@ -15,6 +15,7 @@ type FishRepository interface {
 	GetByID(ctx context.Context, id int64, locale domain.Locale) (*domain.FishData, error)
 	Search(ctx context.Context, query string, locale domain.Locale) ([]domain.FishListResponse, error)
 	ListFamilies(ctx context.Context) ([]string, error)
+	ListCategories(ctx context.Context) ([]domain.CreatureCategoryInfo, error)
 }
 
 type FishService struct {
@@ -34,8 +35,8 @@ func NewFishService(repo FishRepository, cache FishCachePort) *FishService {
 }
 
 func (s *FishService) List(ctx context.Context, filter domain.FishFilter) (*domain.FishListResult, error) {
-	cacheKey := fmt.Sprintf("fish:list:%s:%s:%s:%s:%d:%d",
-		filter.Locale, filter.Family, filter.CareLevel, filter.Search, filter.Page, filter.Limit)
+	cacheKey := fmt.Sprintf("fish:list:%s:%s:%s:%s:%s:%d:%d",
+		filter.Locale, filter.Category, filter.Family, filter.CareLevel, filter.Search, filter.Page, filter.Limit)
 
 	if cached, err := s.cache.GetFishList(ctx, cacheKey); err == nil {
 		return cached, nil
@@ -77,4 +78,8 @@ func (s *FishService) Search(ctx context.Context, query string, locale domain.Lo
 
 func (s *FishService) ListFamilies(ctx context.Context) ([]string, error) {
 	return s.repo.ListFamilies(ctx)
+}
+
+func (s *FishService) ListCategories(ctx context.Context) ([]domain.CreatureCategoryInfo, error) {
+	return s.repo.ListCategories(ctx)
 }

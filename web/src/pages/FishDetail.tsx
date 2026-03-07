@@ -7,6 +7,17 @@ import { fishApi } from '../api/fish'
 import { clsx } from 'clsx'
 import { events } from '../lib/posthog'
 
+const CATEGORY_EMOJI: Record<string, string> = {
+  fish: '🐠', reptile: '🦎', amphibian: '🐸', insect: '🐜',
+  arachnid: '🕷️', bird: '🦜', mammal: '🐹',
+}
+const CATEGORY_NAME: Record<string, string> = {
+  fish: '열대어', reptile: '파충류', amphibian: '양서류', insect: '곤충',
+  arachnid: '거미류', bird: '조류', mammal: '소동물',
+}
+const getCategoryEmoji = (cat: string) => CATEGORY_EMOJI[cat] ?? '🐾'
+const getCategoryName = (cat: string) => CATEGORY_NAME[cat] ?? cat
+
 export default function FishDetail() {
   const { id } = useParams<{ id: string }>()
   const { t, i18n } = useTranslation()
@@ -82,6 +93,11 @@ export default function FishDetail() {
 
           {/* 빠른 배지 */}
           <div className="flex flex-wrap gap-2 mt-3">
+            {fish.creature_category && fish.creature_category !== 'fish' && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm">
+                {getCategoryEmoji(fish.creature_category)} {getCategoryName(fish.creature_category)}
+              </span>
+            )}
             {fish.care_level && (
               <span className={clsx('text-xs px-3 py-1 rounded-full font-medium', {
                 'bg-green-100 text-green-700': fish.care_level === 'BEGINNER',
@@ -143,6 +159,64 @@ export default function FishDetail() {
       )}
       {breedingNotes && (
         <Section title={t('fish.breeding')}>{breedingNotes}</Section>
+      )}
+
+      {/* 추가 사육 정보 (extra_attributes) */}
+      {fish.extra_attributes && (
+        <div className="bg-gray-50 rounded-xl p-4 space-y-3 mb-4">
+          <h3 className="font-semibold text-gray-800">추가 사육 정보</h3>
+          {fish.extra_attributes.humidity_min != null && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">습도</span>
+              <span>{fish.extra_attributes.humidity_min}–{fish.extra_attributes.humidity_max}%</span>
+            </div>
+          )}
+          {fish.extra_attributes.uv_requirement && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">UV 조명</span>
+              <span className="capitalize">{fish.extra_attributes.uv_requirement}</span>
+            </div>
+          )}
+          {fish.extra_attributes.basking_temp_c != null && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">일광욕 온도</span>
+              <span>{fish.extra_attributes.basking_temp_c}°C</span>
+            </div>
+          )}
+          {fish.extra_attributes.colony_size_min != null && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">군체 크기</span>
+              <span>{fish.extra_attributes.colony_size_min}–{fish.extra_attributes.colony_size_max ?? '?'} 마리</span>
+            </div>
+          )}
+          {fish.extra_attributes.venom_level && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">독성</span>
+              <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                fish.extra_attributes.venom_level === 'dangerous' ? 'bg-red-100 text-red-700' :
+                fish.extra_attributes.venom_level === 'moderate' ? 'bg-orange-100 text-orange-700' :
+                'bg-green-100 text-green-700'
+              }`}>{fish.extra_attributes.venom_level}</span>
+            </div>
+          )}
+          {fish.extra_attributes.lifespan_years_min != null && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">수명</span>
+              <span>{fish.extra_attributes.lifespan_years_min}–{fish.extra_attributes.lifespan_years_max ?? '?'}년</span>
+            </div>
+          )}
+          {fish.extra_attributes.legal_status_kr && fish.extra_attributes.legal_status_kr !== 'legal' && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">법적 지위</span>
+              <span className="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                {fish.extra_attributes.legal_status_kr === 'cites_appendix1' ? 'CITES 부속서 I' :
+                 fish.extra_attributes.legal_status_kr === 'cites_appendix2' ? 'CITES 부속서 II' :
+                 fish.extra_attributes.legal_status_kr === 'restricted' ? '규제 대상' :
+                 fish.extra_attributes.legal_status_kr === 'banned' ? '반입 금지' : fish.extra_attributes.legal_status_kr}
+              </span>
+            </div>
+          )}
+        </div>
       )}
 
       {/* 저작권 표시 */}

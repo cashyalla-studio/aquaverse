@@ -82,6 +82,7 @@ func Setup(
 	fish.GET("", fishH.List)
 	fish.GET("/search", fishH.Search)
 	fish.GET("/families", fishH.ListFamilies)
+	fish.GET("/categories", fishH.ListCategories)
 	fish.GET("/:id", fishH.Get)
 	fish.GET("/:id/compatible", compatH.GetCompatibleFish)
 	fish.GET("/check-compat", compatH.CheckWithClaude)

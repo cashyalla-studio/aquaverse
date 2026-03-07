@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Search, Filter, Droplets, Thermometer, Ruler } from 'lucide-react'
-import { fishApi, type FishListItem } from '../api/fish'
+import { fishApi, type FishListItem, type CreatureCategory } from '../api/fish'
 import { clsx } from 'clsx'
 import { events } from '../lib/posthog'
 
@@ -20,11 +20,12 @@ export default function FishEncyclopedia() {
   const [careLevel, setCareLevel] = useState('')
   const [family, setFamily] = useState('')
   const [page, setPage] = useState(1)
+  const [activeCategory, setActiveCategory] = useState('')
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['fish', { search, careLevel, family, page, locale: i18n.language }],
+    queryKey: ['fish', { search, careLevel, family, page, locale: i18n.language, activeCategory }],
     queryFn: () =>
-      fishApi.list({ q: search, care_level: careLevel, family, page, limit: 24, locale: i18n.language })
+      fishApi.list({ q: search, care_level: careLevel, family, page, limit: 24, locale: i18n.language, category: activeCategory || undefined })
         .then((r) => r.data),
     staleTime: 5 * 60 * 1000,
   })
@@ -32,6 +33,12 @@ export default function FishEncyclopedia() {
   const { data: families } = useQuery({
     queryKey: ['fish-families'],
     queryFn: () => fishApi.families().then((r) => r.data),
+    staleTime: 60 * 60 * 1000,
+  })
+
+  const { data: categories } = useQuery({
+    queryKey: ['fish-categories'],
+    queryFn: () => fishApi.categories().then((r) => r.data),
     staleTime: 60 * 60 * 1000,
   })
 
@@ -43,6 +50,10 @@ export default function FishEncyclopedia() {
     }
   }, [data, search])
 
+  useEffect(() => {
+    setPage(1)
+  }, [activeCategory])
+
   return (
     <div>
       {/* 헤더 */}
@@ -51,6 +62,33 @@ export default function FishEncyclopedia() {
         <p className="text-gray-500 mt-1">
           {data?.total_count.toLocaleString()} species
         </p>
+      </div>
+
+      {/* 카테고리 탭바 */}
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mb-4">
+        <button
+          onClick={() => setActiveCategory('')}
+          className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            activeCategory === ''
+              ? 'bg-teal-600 text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+        >
+          🌍 전체
+        </button>
+        {(categories ?? []).map((cat: CreatureCategory) => (
+          <button
+            key={cat.code}
+            onClick={() => setActiveCategory(cat.code)}
+            className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              activeCategory === cat.code
+                ? 'bg-teal-600 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            {cat.icon_emoji} {cat.name_ko}
+          </button>
+        ))}
       </div>
 
       {/* 검색 + 필터 */}

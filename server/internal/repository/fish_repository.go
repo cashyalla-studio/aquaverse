@@ -33,6 +33,11 @@ func (r *FishRepository) List(ctx context.Context, filter domain.FishFilter) ([]
 		args = append(args, filter.CareLevel)
 		idx++
 	}
+	if filter.Category != "" {
+		where = append(where, fmt.Sprintf("creature_category = $%d", idx))
+		args = append(args, filter.Category)
+		idx++
+	}
 	if filter.Search != "" {
 		where = append(where, fmt.Sprintf(
 			"(to_tsvector('simple', coalesce(scientific_name,'') || ' ' || coalesce(primary_common_name,'')) @@ plainto_tsquery('simple', $%d) OR scientific_name ILIKE $%d OR primary_common_name ILIKE $%d)",
@@ -194,6 +199,13 @@ func (r *FishRepository) ListFamilies(ctx context.Context) ([]string, error) {
 		return nil, err
 	}
 	return families, nil
+}
+
+func (r *FishRepository) ListCategories(ctx context.Context) ([]domain.CreatureCategoryInfo, error) {
+	var cats []domain.CreatureCategoryInfo
+	q := `SELECT code, name_ko, name_en, icon_emoji, sort_order, is_active
+          FROM creature_categories WHERE is_active = TRUE ORDER BY sort_order`
+	return cats, r.db.SelectContext(ctx, &cats, q)
 }
 
 // Save 크롤러/파이프라인에서 사용
