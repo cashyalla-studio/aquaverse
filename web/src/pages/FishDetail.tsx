@@ -1,0 +1,177 @@
+import { useParams, Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
+import { ArrowLeft, Droplets, Thermometer, Ruler, Clock, AlertTriangle } from 'lucide-react'
+import { fishApi } from '../api/fish'
+import { clsx } from 'clsx'
+
+export default function FishDetail() {
+  const { id } = useParams<{ id: string }>()
+  const { t, i18n } = useTranslation()
+
+  const { data: fish, isLoading, isError } = useQuery({
+    queryKey: ['fish', id, i18n.language],
+    queryFn: () => fishApi.get(Number(id), i18n.language).then((r) => r.data),
+    enabled: !!id,
+  })
+
+  if (isLoading) return (
+    <div className="animate-pulse space-y-4">
+      <div className="h-64 bg-gray-200 rounded-xl" />
+      <div className="h-8 bg-gray-200 rounded w-1/2" />
+      <div className="grid grid-cols-2 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="h-20 bg-gray-200 rounded-xl" />
+        ))}
+      </div>
+    </div>
+  )
+
+  if (isError || !fish) return (
+    <div className="text-center py-12">
+      <p className="text-gray-500">{t('common.error')}</p>
+      <Link to="/fish" className="text-primary-600 mt-2 inline-block">← {t('nav.encyclopedia')}</Link>
+    </div>
+  )
+
+  // 번역 우선 적용
+  const careNotes = fish.translation?.care_notes || fish.care_notes
+  const breedingNotes = fish.translation?.breeding_notes || fish.breeding_notes
+  const dietNotes = fish.translation?.diet_notes || fish.diet_notes
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      {/* 뒤로 */}
+      <Link to="/fish" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary-600 mb-4">
+        <ArrowLeft size={16} /> {t('nav.encyclopedia')}
+      </Link>
+
+      {/* 히어로 */}
+      <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
+        <div className="h-64 bg-gradient-to-br from-blue-50 to-cyan-100 relative">
+          {fish.primary_image_url ? (
+            <img src={fish.primary_image_url} alt={fish.primary_common_name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="flex items-center justify-center h-full text-8xl">🐠</div>
+          )}
+        </div>
+
+        <div className="p-6">
+          <h1 className="text-2xl font-bold text-gray-900">
+            {fish.translation?.common_name || fish.primary_common_name}
+          </h1>
+          <p className="text-gray-400 italic mt-1">{fish.scientific_name}</p>
+          <p className="text-sm text-gray-500 mt-1">Family: {fish.family}</p>
+
+          {/* 빠른 배지 */}
+          <div className="flex flex-wrap gap-2 mt-3">
+            {fish.care_level && (
+              <span className={clsx('text-xs px-3 py-1 rounded-full font-medium', {
+                'bg-green-100 text-green-700': fish.care_level === 'BEGINNER',
+                'bg-yellow-100 text-yellow-700': fish.care_level === 'INTERMEDIATE',
+                'bg-red-100 text-red-700': fish.care_level === 'EXPERT',
+              })}>
+                {t(`fish.care_levels.${fish.care_level}`)}
+              </span>
+            )}
+            {fish.temperament && (
+              <span className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">
+                {t(`fish.temperaments.${fish.temperament}`)}
+              </span>
+            )}
+            {fish.diet_type && (
+              <span className="text-xs px-3 py-1 rounded-full bg-purple-100 text-purple-700 font-medium">
+                {t(`fish.diet_types.${fish.diet_type}`)}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 수치 파라미터 그리드 */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+        <ParamCard
+          icon={<Ruler size={18} className="text-primary-500" />}
+          label={t('fish.max_size')}
+          value={fish.max_size_cm ? `${fish.max_size_cm} cm` : '—'}
+        />
+        <ParamCard
+          icon={<Droplets size={18} className="text-blue-500" />}
+          label={t('fish.tank_size')}
+          value={fish.min_tank_size_liters ? `${fish.min_tank_size_liters} L` : '—'}
+        />
+        <ParamCard
+          icon={<Droplets size={18} className="text-cyan-500" />}
+          label={t('fish.ph_range')}
+          value={(fish.ph_min && fish.ph_max) ? `${fish.ph_min} – ${fish.ph_max}` : '—'}
+        />
+        <ParamCard
+          icon={<Thermometer size={18} className="text-orange-500" />}
+          label={t('fish.temp_range')}
+          value={(fish.temp_min_c && fish.temp_max_c) ? `${fish.temp_min_c}–${fish.temp_max_c}°C` : '—'}
+        />
+        <ParamCard
+          icon={<Clock size={18} className="text-gray-500" />}
+          label={t('fish.lifespan')}
+          value={fish.lifespan_years ? `${fish.lifespan_years} yrs` : '—'}
+        />
+      </div>
+
+      {/* 텍스트 섹션들 */}
+      {careNotes && (
+        <Section title={t('fish.care_notes')}>{careNotes}</Section>
+      )}
+      {dietNotes && (
+        <Section title={t('fish.diet')}>{dietNotes}</Section>
+      )}
+      {breedingNotes && (
+        <Section title={t('fish.breeding')}>{breedingNotes}</Section>
+      )}
+
+      {/* 저작권 표시 */}
+      {fish.attribution && (
+        <div className="mt-6 p-4 bg-gray-50 rounded-xl text-xs text-gray-400">
+          <AlertTriangle size={12} className="inline mr-1" />
+          {fish.attribution} | {fish.license}
+        </div>
+      )}
+
+      {/* 분양마켓 연계 */}
+      <div className="mt-6 p-5 bg-primary-50 rounded-xl flex items-center justify-between">
+        <div>
+          <p className="font-semibold text-primary-800">
+            Looking for {fish.translation?.common_name || fish.primary_common_name}?
+          </p>
+          <p className="text-sm text-primary-600 mt-0.5">Check the adoption market</p>
+        </div>
+        <Link
+          to={`/marketplace?fish_id=${fish.id}`}
+          className="bg-primary-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-600"
+        >
+          {t('nav.marketplace')} →
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+function ParamCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-3">
+      {icon}
+      <div>
+        <p className="text-xs text-gray-400">{label}</p>
+        <p className="font-semibold text-gray-900 text-sm">{value}</p>
+      </div>
+    </div>
+  )
+}
+
+function Section({ title, children }: { title: string; children: string }) {
+  return (
+    <div className="bg-white rounded-xl shadow-sm p-5 mb-4">
+      <h2 className="font-semibold text-gray-800 mb-2">{title}</h2>
+      <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{children}</p>
+    </div>
+  )
+}

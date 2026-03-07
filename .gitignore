@@ -1,0 +1,41 @@
+# 환경변수 (절대 커밋 금지)
+.env
+.env.local
+.env.*.local
+
+# Go 빌드
+server/bin/
+server/tmp/
+
+# Go 모듈 캐시
+*.test
+
+# Node / Web
+web/node_modules/
+web/dist/
+web/.vite/
+
+# Flutter / Dart
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/build/
+app/.packages
+app/pubspec.lock
+**/*.g.dart
+**/*.freezed.dart
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker 볼륨 데이터
+infra/data/
+
+# 로컬 Claude 설정 (선택적)
+# .claude/

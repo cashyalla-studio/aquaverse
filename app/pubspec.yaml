@@ -1,0 +1,81 @@
+name: aquaverse
+description: AquaVerse - Tropical Fish Community & Marketplace
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+  flutter: '>=3.24.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # 상태관리
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # 네트워크
+  dio: ^5.7.0
+  retrofit: ^4.4.1
+
+  # 로컬 저장소
+  flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.3.2
+  hive_flutter: ^1.1.0
+
+  # UI
+  go_router: ^14.2.7
+  cached_network_image: ^3.4.1
+  flutter_svg: ^2.0.10+1
+  shimmer: ^3.0.0
+  photo_view: ^0.15.0
+  image_picker: ^1.1.2
+  pinch_zoom_release_unzoom: ^1.0.3
+
+  # 지도
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  geolocator: ^13.0.1
+
+  # 다국어 (14개 로케일)
+  intl: ^0.19.0
+
+  # 푸시 알림
+  firebase_core: ^3.4.0
+  firebase_messaging: ^15.1.0
+  flutter_local_notifications: ^17.2.2
+
+  # 기타
+  url_launcher: ^6.3.0
+  share_plus: ^10.0.2
+  permission_handler: ^11.3.1
+  connectivity_plus: ^6.0.3
+  package_info_plus: ^8.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.12
+  riverpod_generator: ^2.4.3
+  retrofit_generator: ^8.2.1
+  json_annotation: ^4.9.0
+  json_serializable: ^6.8.0
+
+flutter:
+  uses-material-design: true
+  generate: true  # l10n 자동 생성 활성화
+
+  assets:
+    - assets/images/
+    - assets/icons/
+
+  fonts:
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/NotoSans-Regular.ttf
+        - asset: assets/fonts/NotoSans-Bold.ttf
+          weight: 700

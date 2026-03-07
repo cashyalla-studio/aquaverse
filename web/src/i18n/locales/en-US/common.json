@@ -1,0 +1,62 @@
+{
+  "app_name": "AquaVerse",
+  "nav": {
+    "home": "Home",
+    "encyclopedia": "Fish Encyclopedia",
+    "community": "Community",
+    "marketplace": "Adoption Market",
+    "my_tanks": "My Tanks",
+    "profile": "Profile"
+  },
+  "auth": {
+    "login": "Sign In",
+    "logout": "Sign Out",
+    "register": "Create Account",
+    "email": "Email",
+    "password": "Password",
+    "forgot_password": "Forgot Password?"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "no_results": "No results found",
+    "page": "Page",
+    "of": "of",
+    "view_more": "View More"
+  },
+  "fish": {
+    "scientific_name": "Scientific Name",
+    "common_name": "Common Name",
+    "family": "Family",
+    "care_level": "Care Level",
+    "temperament": "Temperament",
+    "max_size": "Max Size",
+    "tank_size": "Min Tank Size",
+    "ph_range": "pH Range",
+    "temp_range": "Temperature Range",
+    "diet": "Diet",
+    "lifespan": "Lifespan",
+    "breeding": "Breeding",
+    "care_notes": "Care Notes",
+    "care_levels": {
+      "BEGINNER": "Beginner",
+      "INTERMEDIATE": "Intermediate",
+      "EXPERT": "Expert"
+    },
+    "temperaments": {
+      "PEACEFUL": "Peaceful",
+      "SEMI_AGGRESSIVE": "Semi-Aggressive",
+      "AGGRESSIVE": "Aggressive"
+    },
+    "diet_types": {
+      "OMNIVORE": "Omnivore",
+      "CARNIVORE": "Carnivore",
+      "HERBIVORE": "Herbivore"
+    }
+  }
+}

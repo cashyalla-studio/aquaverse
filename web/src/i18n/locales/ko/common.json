@@ -1,0 +1,62 @@
+{
+  "app_name": "아쿠아버스",
+  "nav": {
+    "home": "홈",
+    "encyclopedia": "어종 도감",
+    "community": "커뮤니티",
+    "marketplace": "분양마켓",
+    "my_tanks": "내 수조",
+    "profile": "프로필"
+  },
+  "auth": {
+    "login": "로그인",
+    "logout": "로그아웃",
+    "register": "회원가입",
+    "email": "이메일",
+    "password": "비밀번호",
+    "forgot_password": "비밀번호 찾기"
+  },
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "수정",
+    "search": "검색",
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "no_results": "결과가 없습니다",
+    "page": "페이지",
+    "of": "/",
+    "view_more": "더 보기"
+  },
+  "fish": {
+    "scientific_name": "학명",
+    "common_name": "일반명",
+    "family": "과",
+    "care_level": "사육 난이도",
+    "temperament": "성격",
+    "max_size": "최대 크기",
+    "tank_size": "권장 수조",
+    "ph_range": "pH 범위",
+    "temp_range": "수온 범위",
+    "diet": "먹이",
+    "lifespan": "수명",
+    "breeding": "번식",
+    "care_notes": "사육 노트",
+    "care_levels": {
+      "BEGINNER": "초급",
+      "INTERMEDIATE": "중급",
+      "EXPERT": "고급"
+    },
+    "temperaments": {
+      "PEACEFUL": "온순",
+      "SEMI_AGGRESSIVE": "반공격적",
+      "AGGRESSIVE": "공격적"
+    },
+    "diet_types": {
+      "OMNIVORE": "잡식",
+      "CARNIVORE": "육식",
+      "HERBIVORE": "초식"
+    }
+  }
+}
