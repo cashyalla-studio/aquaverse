@@ -1,0 +1,7 @@
+app_identifier("com.aquaverse.app")
+apple_id("developer@finara.app")  # Apple Developer 계정
+team_id("TEAMID")  # Apple Team ID
+
+# Android
+json_key_file("fastlane/google-play-key.json")
+package_name("com.aquaverse.app")

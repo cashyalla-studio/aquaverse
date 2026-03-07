@@ -201,10 +201,18 @@ func main() {
 	socialSvc := service.NewSocialService(db)
 	socialH := handler.NewSocialHandler(socialSvc)
 
+	// TOTP 2FA 서비스 및 핸들러
+	totpSvc := service.NewTOTPService(db)
+	totpH := handler.NewTOTPHandler(totpSvc)
+
+	// AI 어종 식별 서비스 및 핸들러
+	speciesIdentifySvc := service.NewSpeciesIdentifyService(db, cfg.AI.APIKey)
+	speciesH := handler.NewSpeciesIdentifyHandler(speciesIdentifySvc)
+
 	// ── Echo 라우터 설정 ───────────────────────────────────
 	e := echo.New()
 	e.HideBanner = true
-	router.Setup(e, cfg, rdb, authH, fishH, commH, mktH, uploadH, chatH, phoneH, metricsH, citesH, escrowH, compatH, tankDoctorH, paymentH, businessH, notifH, videoH, subH, sitemapH, adminH, socialH)
+	router.Setup(e, cfg, rdb, authH, fishH, commH, mktH, uploadH, chatH, phoneH, metricsH, citesH, escrowH, compatH, tankDoctorH, paymentH, businessH, notifH, videoH, subH, sitemapH, adminH, socialH, totpH, speciesH)
 	router.SetupHealthCheck(e, db, rdb)
 
 	// ── 그레이스풀 셧다운 ──────────────────────────────────

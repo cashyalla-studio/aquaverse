@@ -3,6 +3,7 @@
 .PHONY: server web app infra migrate dev-up dev-down build-all \
         local-up local-down local-build local-logs local-ps local-clean \
         app-run-android app-run-ios app-run-chrome app-run-device app-codegen \
+        app-deploy-ios app-deploy-android app-deploy-all \
         monitoring-up monitoring-down
 
 # ── 서버 ──────────────────────────────────────────────
@@ -180,6 +181,20 @@ monitoring-up: ## Prometheus + Grafana 시작
 
 monitoring-down: ## Prometheus + Grafana 중지
 	docker compose -f docker-compose.local.yml stop prometheus grafana
+
+# ── App Store 배포 ──────────────────────────────────
+.PHONY: app-deploy-ios app-deploy-android app-deploy-all
+
+## iOS TestFlight 배포 (Fastlane)
+app-deploy-ios:
+	cd app && bundle exec fastlane ios beta
+
+## Android Play Store Internal 배포
+app-deploy-android:
+	cd app && bundle exec fastlane android beta
+
+## 전체 플랫폼 배포
+app-deploy-all: app-deploy-ios app-deploy-android
 
 # ── 전체 ─────────────────────────────────────────────
 build-all: server-build web-build

@@ -122,3 +122,9 @@ type RefreshToken struct {
 	CreatedAt time.Time `db:"created_at"`
 	RevokedAt *time.Time `db:"revoked_at"`
 }
+
+// TOTPStatus TOTP 2단계 인증 상태
+type TOTPStatus struct {
+	Enabled    bool       `json:"totp_enabled" db:"totp_enabled"`
+	VerifiedAt *time.Time `json:"verified_at" db:"totp_verified_at"`
+}

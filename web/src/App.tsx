@@ -24,6 +24,7 @@ const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
 const TradeChat = lazy(() => import('./pages/trade/TradeChat'))
 const PhoneVerify = lazy(() => import('./pages/auth/PhoneVerify'))
+const TotpSetup = lazy(() => import('./pages/auth/TotpSetup'))
 const FishCompatibility = lazy(() => import('./pages/fish/FishCompatibility'))
 const TankDoctorPage = lazy(() => import('./pages/tanks/TankDoctorPage'))
 const BusinessList = lazy(() => import('./pages/business/BusinessList'))
@@ -34,6 +35,7 @@ const SubscriptionPage = lazy(() => import('./pages/subscription/SubscriptionPag
 const SocialFeed = lazy(() => import('./pages/social/Feed'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'))
+const SpeciesIdentify = lazy(() => import('./pages/species/SpeciesIdentify'))
 
 const Spinner = () => (
   <div className="flex h-64 items-center justify-center">
@@ -114,6 +116,7 @@ export default function App() {
                     </PrivateRoute>
                   }
                 />
+                <Route path="/identify" element={<SpeciesIdentify />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route
@@ -129,6 +132,14 @@ export default function App() {
                   element={
                     <PrivateRoute>
                       <PhoneVerify />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/settings/security"
+                  element={
+                    <PrivateRoute>
+                      <TotpSetup />
                     </PrivateRoute>
                   }
                 />

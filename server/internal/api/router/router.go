@@ -38,6 +38,8 @@ func Setup(
 	sitemapH *handler.SitemapHandler,
 	adminH *handler.AdminHandler,
 	socialH *handler.SocialHandler,
+	totpH *handler.TOTPHandler,
+	speciesH *handler.SpeciesIdentifyHandler,
 ) {
 	// 글로벌 미들웨어
 	e.Use(echomw.Logger())
@@ -67,6 +69,13 @@ func Setup(
 	auth.POST("/refresh", authH.Refresh)
 	auth.POST("/logout", authH.Logout)
 	auth.POST("/logout-all", authH.LogoutAll, middleware.JWTAuth(cfg.Auth.JWTSecret))
+
+	// TOTP 2FA (인증 필요)
+	authTOTP := auth.Group("", middleware.JWTAuth(cfg.Auth.JWTSecret))
+	authTOTP.GET("/totp", totpH.GetStatus)
+	authTOTP.POST("/totp/enable", totpH.Enable)
+	authTOTP.POST("/totp/verify", totpH.Verify)
+	authTOTP.DELETE("/totp", totpH.Disable)
 
 	// ── 열대어 백과사전 (공개) ──────────────────────────────
 	fish := api.Group("/fish")
@@ -205,6 +214,9 @@ func Setup(
 	social.GET("/following", socialH.GetFollowing)
 	social.POST("/users/:id/follow", socialH.Follow)
 	social.DELETE("/users/:id/follow", socialH.Unfollow)
+
+	// ── AI 어종 식별 (공개, 선택적 인증) ────────────────────
+	api.POST("/species/identify", speciesH.Identify)
 }
 
 // SetupHealthCheck DB와 Redis ping을 포함하는 강화된 헬스체크를 등록한다.

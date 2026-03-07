@@ -1,0 +1,76 @@
+# Fastfile
+default_platform(:ios)
+
+platform :ios do
+  desc "TestFlight에 빌드 업로드"
+  lane :beta do
+    # 인증서/프로비저닝 프로파일 관리
+    match(
+      type: "appstore",
+      readonly: true,
+      git_url: "git@github.com:cashyalla/aquaverse-certs.git"
+    )
+
+    # 버전 번호 자동 증가
+    increment_build_number(
+      build_number: ENV["BUILD_NUMBER"] || Time.now.strftime("%Y%m%d%H%M")
+    )
+
+    # Flutter 빌드
+    sh("flutter build ipa --release --dart-define=ENV=prod --dart-define=API_URL=#{ENV['API_URL'] || 'https://api.finara.app'}")
+
+    # TestFlight 업로드
+    upload_to_testflight(
+      ipa: "../build/ios/ipa/app.ipa",
+      skip_waiting_for_build_processing: true,
+      changelog: ENV["RELEASE_NOTES"] || "새로운 기능 및 버그 수정"
+    )
+  end
+
+  desc "App Store 심사 제출"
+  lane :release do
+    match(type: "appstore", readonly: true)
+    increment_build_number(build_number: ENV["BUILD_NUMBER"])
+    sh("flutter build ipa --release --dart-define=ENV=prod --dart-define=API_URL=#{ENV['API_URL']}")
+    deliver(
+      ipa: "../build/ios/ipa/app.ipa",
+      submit_for_review: false,
+      automatic_release: false,
+      force: true
+    )
+  end
+end
+
+platform :android do
+  desc "Play Store Internal Test 트랙에 업로드"
+  lane :beta do
+    # 버전 코드 자동 증가
+    android_set_version_code(
+      version_code: (ENV["BUILD_NUMBER"] || Time.now.strftime("%Y%m%d%H%M")).to_i,
+      gradle_file: "app/build.gradle"
+    )
+
+    # Flutter 빌드 (AAB)
+    sh("flutter build appbundle --release --dart-define=ENV=prod --dart-define=API_URL=#{ENV['API_URL'] || 'https://api.finara.app'}")
+
+    # Play Store 업로드
+    upload_to_play_store(
+      track: "internal",
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      json_key: "fastlane/google-play-key.json",
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Play Store Production 트랙으로 승격"
+  lane :release do
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "production",
+      json_key: "fastlane/google-play-key.json",
+      skip_upload_changelogs: false
+    )
+  end
+end

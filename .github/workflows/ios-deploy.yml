@@ -1,0 +1,52 @@
+name: iOS TestFlight Deploy
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'app/**'
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: '릴리스 노트'
+        required: false
+        default: '새로운 기능 및 버그 수정'
+
+jobs:
+  deploy-ios:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Flutter 설치
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Ruby 설정
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: app
+
+      - name: Flutter 의존성 설치
+        run: flutter pub get
+
+      - name: Fastlane iOS Beta 배포
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+          BUILD_NUMBER: ${{ github.run_number }}
+          RELEASE_NOTES: ${{ github.event.inputs.release_notes || '새로운 기능 및 버그 수정' }}
+          API_URL: ${{ secrets.PROD_API_URL }}
+        run: bundle exec fastlane ios beta
