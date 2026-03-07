@@ -175,3 +175,21 @@ type FishListResponse struct {
 	PrimaryImageURL   *string   `json:"primary_image_url,omitempty"`
 	QualityScore      float64   `json:"quality_score"`
 }
+
+// FishFilter 어종 목록 필터
+type FishFilter struct {
+	Family    string
+	CareLevel string
+	Search    string
+	Locale    Locale
+	Page      int
+	Limit     int
+}
+
+// FishListResult 어종 목록 결과
+type FishListResult struct {
+	Items      []FishListResponse `json:"items"`
+	TotalCount int                `json:"total_count"`
+	Page       int                `json:"page"`
+	Limit      int                `json:"limit"`
+}

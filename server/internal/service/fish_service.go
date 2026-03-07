@@ -7,24 +7,11 @@ import (
 	"github.com/cashyalla/aquaverse/internal/domain"
 )
 
-type FishFilter struct {
-	Family    string
-	CareLevel string
-	Search    string
-	Locale    domain.Locale
-	Page      int
-	Limit     int
-}
-
-type FishListResult struct {
-	Items      []domain.FishListResponse `json:"items"`
-	TotalCount int                       `json:"total_count"`
-	Page       int                       `json:"page"`
-	Limit      int                       `json:"limit"`
-}
+// FishFilter = domain.FishFilter
+// FishListResult = domain.FishListResult
 
 type FishRepository interface {
-	List(ctx context.Context, filter FishFilter) ([]domain.FishListResponse, int, error)
+	List(ctx context.Context, filter domain.FishFilter) ([]domain.FishListResponse, int, error)
 	GetByID(ctx context.Context, id int64, locale domain.Locale) (*domain.FishData, error)
 	Search(ctx context.Context, query string, locale domain.Locale) ([]domain.FishListResponse, error)
 	ListFamilies(ctx context.Context) ([]string, error)
@@ -38,15 +25,15 @@ type FishService struct {
 type FishCachePort interface {
 	GetFish(ctx context.Context, key string) (*domain.FishData, error)
 	SetFish(ctx context.Context, key string, fish *domain.FishData) error
-	GetFishList(ctx context.Context, key string) (*FishListResult, error)
-	SetFishList(ctx context.Context, key string, result *FishListResult) error
+	GetFishList(ctx context.Context, key string) (*domain.FishListResult, error)
+	SetFishList(ctx context.Context, key string, result *domain.FishListResult) error
 }
 
 func NewFishService(repo FishRepository, cache FishCachePort) *FishService {
 	return &FishService{repo: repo, cache: cache}
 }
 
-func (s *FishService) List(ctx context.Context, filter FishFilter) (*FishListResult, error) {
+func (s *FishService) List(ctx context.Context, filter domain.FishFilter) (*domain.FishListResult, error) {
 	cacheKey := fmt.Sprintf("fish:list:%s:%s:%s:%s:%d:%d",
 		filter.Locale, filter.Family, filter.CareLevel, filter.Search, filter.Page, filter.Limit)
 
@@ -59,7 +46,7 @@ func (s *FishService) List(ctx context.Context, filter FishFilter) (*FishListRes
 		return nil, err
 	}
 
-	result := &FishListResult{
+	result := &domain.FishListResult{
 		Items:      items,
 		TotalCount: total,
 		Page:       filter.Page,

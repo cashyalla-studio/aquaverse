@@ -7,8 +7,7 @@ import (
 	"strings"
 
 	"github.com/cashyalla/aquaverse/internal/domain"
-	"github.com/cashyalla/aquaverse/internal/service"
-	"github.com/jmoiron/sqlx"
+		"github.com/jmoiron/sqlx"
 )
 
 type FishRepository struct {
@@ -19,7 +18,7 @@ func NewFishRepository(db *sqlx.DB) *FishRepository {
 	return &FishRepository{db: db}
 }
 
-func (r *FishRepository) List(ctx context.Context, filter service.FishFilter) ([]domain.FishListResponse, int, error) {
+func (r *FishRepository) List(ctx context.Context, filter domain.FishFilter) ([]domain.FishListResponse, int, error) {
 	args := []interface{}{}
 	where := []string{"publish_status = 'PUBLISHED'"}
 	idx := 1

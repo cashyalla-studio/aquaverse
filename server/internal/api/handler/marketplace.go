@@ -20,7 +20,7 @@ func NewMarketplaceHandler(mktSvc *service.MarketplaceService) *MarketplaceHandl
 // GET /api/v1/listings
 // Query: lat, lng, radius_km, fish_id, min_price, max_price, trade_type, page, limit
 func (h *MarketplaceHandler) ListListings(c echo.Context) error {
-	filter := service.ListingFilter{
+	filter := domain.ListingFilter{
 		Page:  1,
 		Limit: 20,
 	}

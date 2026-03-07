@@ -8,8 +8,7 @@ import (
 	"strings"
 
 	"github.com/cashyalla/aquaverse/internal/domain"
-	"github.com/cashyalla/aquaverse/internal/service"
-	"github.com/jmoiron/sqlx"
+		"github.com/jmoiron/sqlx"
 )
 
 type MarketplaceRepository struct {
@@ -20,7 +19,7 @@ func NewMarketplaceRepository(db *sqlx.DB) *MarketplaceRepository {
 	return &MarketplaceRepository{db: db}
 }
 
-func (r *MarketplaceRepository) ListListings(ctx context.Context, filter service.ListingFilter) ([]domain.Listing, int, error) {
+func (r *MarketplaceRepository) ListListings(ctx context.Context, filter domain.ListingFilter) ([]domain.Listing, int, error) {
 	args := []interface{}{}
 	where := []string{fmt.Sprintf("l.status = $%d", 1)}
 	args = append(args, filter.Status)

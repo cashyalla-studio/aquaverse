@@ -247,3 +247,26 @@ type FraudReport struct {
 	CreatedAt   time.Time  `db:"created_at"`
 	ResolvedAt  *time.Time `db:"resolved_at"`
 }
+
+// ListingFilter 분양글 목록 필터
+type ListingFilter struct {
+	Lat        *float64
+	Lng        *float64
+	RadiusKm   *float64
+	FishDataID *int64
+	MinPrice   *decimal.Decimal
+	MaxPrice   *decimal.Decimal
+	TradeType  string
+	Search     string
+	Status     string
+	Page       int
+	Limit      int
+}
+
+// ListingListResult 분양글 목록 결과
+type ListingListResult struct {
+	Items      []Listing `json:"items"`
+	TotalCount int       `json:"total_count"`
+	Page       int       `json:"page"`
+	Limit      int       `json:"limit"`
+}

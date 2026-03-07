@@ -5,29 +5,17 @@ import (
 	"errors"
 
 	"github.com/cashyalla/aquaverse/internal/domain"
-	"github.com/shopspring/decimal"
-)
+	)
 
-type ListingFilter struct {
-	Lat        *float64
-	Lng        *float64
-	RadiusKm   *float64
-	FishDataID *int64
-	MinPrice   *decimal.Decimal
-	MaxPrice   *decimal.Decimal
-	TradeType  string
-	Search     string
-	Status     string
-	Page       int
-	Limit      int
-}
+// ListingFilter and ListingListResult moved to domain package
 
-type ListingListResult struct {
+type _ListingListResult struct {
 	Items      []domain.Listing `json:"items"`
 	TotalCount int              `json:"total_count"`
 	Page       int              `json:"page"`
 	Limit      int              `json:"limit"`
 }
+// (replaced with domain.ListingListResult)
 
 type CreateListingRequest struct {
 	SellerID        string
@@ -117,7 +105,7 @@ type FraudReportRequest struct {
 }
 
 type MarketplaceRepository interface {
-	ListListings(ctx context.Context, filter ListingFilter) ([]domain.Listing, int, error)
+	ListListings(ctx context.Context, filter domain.ListingFilter) ([]domain.Listing, int, error)
 	GetListing(ctx context.Context, id int64) (*domain.Listing, error)
 	CreateListing(ctx context.Context, listing *domain.Listing) error
 	UpdateListingStatus(ctx context.Context, id int64, status domain.ListingStatus) error
@@ -155,7 +143,7 @@ func NewMarketplaceService(
 	return &MarketplaceService{repo: repo, notifier: notifier, fraud: fraud}
 }
 
-func (s *MarketplaceService) ListListings(ctx context.Context, filter ListingFilter) (*ListingListResult, error) {
+func (s *MarketplaceService) ListListings(ctx context.Context, filter domain.ListingFilter) (*domain.ListingListResult, error) {
 	if filter.Page < 1 {
 		filter.Page = 1
 	}
@@ -170,7 +158,7 @@ func (s *MarketplaceService) ListListings(ctx context.Context, filter ListingFil
 	if err != nil {
 		return nil, err
 	}
-	return &ListingListResult{Items: items, TotalCount: total, Page: filter.Page, Limit: filter.Limit}, nil
+	return &domain.ListingListResult{Items: items, TotalCount: total, Page: filter.Page, Limit: filter.Limit}, nil
 }
 
 func (s *MarketplaceService) GetListing(ctx context.Context, id int64) (*domain.Listing, error) {

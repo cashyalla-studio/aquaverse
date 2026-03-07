@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/cashyalla/aquaverse/internal/domain"
-	"github.com/cashyalla/aquaverse/internal/service"
 	"github.com/labstack/echo/v4"
 )
 
@@ -23,7 +22,7 @@ func (h *SitemapHandler) Sitemap(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()
 
-	filter := service.FishFilter{
+	filter := domain.FishFilter{
 		Locale: domain.LocaleENUS,
 		Page:   1,
 		Limit:  1000,

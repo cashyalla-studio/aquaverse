@@ -47,19 +47,19 @@ func (c *RedisCache) SetFish(ctx context.Context, key string, fish *domain.FishD
 	return c.rdb.Set(ctx, "av:"+key, b, ttlFishDetail).Err()
 }
 
-func (c *RedisCache) GetFishList(ctx context.Context, key string) (*service.FishListResult, error) {
+func (c *RedisCache) GetFishList(ctx context.Context, key string) (*domain.FishListResult, error) {
 	val, err := c.rdb.Get(ctx, "av:"+key).Bytes()
 	if err != nil {
 		return nil, err
 	}
-	var result service.FishListResult
+	var result domain.FishListResult
 	if err := json.Unmarshal(val, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func (c *RedisCache) SetFishList(ctx context.Context, key string, result *service.FishListResult) error {
+func (c *RedisCache) SetFishList(ctx context.Context, key string, result *domain.FishListResult) error {
 	b, err := json.Marshal(result)
 	if err != nil {
 		return err
@@ -90,16 +90,16 @@ func (c *RedisCache) SetBoards(ctx context.Context, locale string, boards []doma
 
 // ── 마켓플레이스 캐시 ───────────────────────────────────
 
-func (c *RedisCache) GetListings(ctx context.Context, key string) (*service.ListingListResult, error) {
+func (c *RedisCache) GetListings(ctx context.Context, key string) (*domain.ListingListResult, error) {
 	val, err := c.rdb.Get(ctx, "av:listings:"+key).Bytes()
 	if err != nil {
 		return nil, err
 	}
-	var result service.ListingListResult
+	var result domain.ListingListResult
 	return &result, json.Unmarshal(val, &result)
 }
 
-func (c *RedisCache) SetListings(ctx context.Context, key string, result *service.ListingListResult) error {
+func (c *RedisCache) SetListings(ctx context.Context, key string, result *domain.ListingListResult) error {
 	b, _ := json.Marshal(result)
 	return c.rdb.Set(ctx, "av:listings:"+key, b, 2*time.Minute).Err()
 }

@@ -34,7 +34,7 @@ func (h *FishHandler) List(c echo.Context) error {
 		limit = 20
 	}
 
-	filter := service.FishFilter{
+	filter := domain.FishFilter{
 		Family:    c.QueryParam("family"),
 		CareLevel: c.QueryParam("care_level"),
 		Search:    c.QueryParam("q"),
