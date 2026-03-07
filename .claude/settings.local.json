@@ -4,7 +4,9 @@
       "Bash(mkdir:*)",
       "Bash(go mod:*)",
       "Bash(cmd.exe:*)",
-      "Bash(go build:*)"
+      "Bash(go build:*)",
+      "Bash(gh:*)",
+      "Bash(curl:*)"
     ]
   }
 }
