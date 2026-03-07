@@ -13,6 +13,7 @@ export const apiClient: AxiosInstance = axios.create({
 })
 
 // 요청 인터셉터: 인증 토큰 + 로케일 헤더 자동 추가
+// authStore에서 직접 import하면 순환 의존성이 생기므로 localStorage에서 직접 읽음
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('av_access_token')
   if (token) {
@@ -23,7 +24,7 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
-// 응답 인터셉터: 401 시 토큰 갱신
+// 응답 인터셉터: 401 시 토큰 갱신 또는 로그아웃 처리
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -38,10 +39,14 @@ apiClient.interceptors.response.use(
         const { access_token } = res.data
         localStorage.setItem('av_access_token', access_token)
         original.headers.Authorization = `Bearer ${access_token}`
+        // authStore의 accessToken도 동기화
+        const { useAuthStore } = await import('../store/authStore')
+        useAuthStore.getState().setTokens(access_token, refreshToken ?? '')
         return apiClient(original)
       } catch {
-        localStorage.removeItem('av_access_token')
-        localStorage.removeItem('av_refresh_token')
+        // 갱신 실패 시 authStore logout으로 상태 초기화
+        const { useAuthStore } = await import('../store/authStore')
+        useAuthStore.getState().logout()
         window.location.href = '/login'
       }
     }

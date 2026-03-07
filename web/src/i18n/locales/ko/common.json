@@ -14,7 +14,21 @@
     "register": "회원가입",
     "email": "이메일",
     "password": "비밀번호",
-    "forgot_password": "비밀번호 찾기"
+    "confirmPassword": "비밀번호 확인",
+    "nickname": "닉네임",
+    "locale": "언어 / 지역",
+    "forgotPassword": "비밀번호 찾기",
+    "forgot_password": "비밀번호 찾기",
+    "noAccount": "계정이 없으신가요?",
+    "hasAccount": "이미 계정이 있으신가요?",
+    "loginSuccess": "다시 오셨군요!",
+    "registerSuccess": "회원가입이 완료되었습니다!",
+    "loginError": "이메일 또는 비밀번호가 올바르지 않습니다.",
+    "registerError": "회원가입에 실패했습니다. 다시 시도해 주세요.",
+    "termsAgree": "다음에 동의합니다:",
+    "termsOfService": "서비스 이용약관",
+    "privacyPolicy": "개인정보처리방침",
+    "and": "및"
   },
   "common": {
     "save": "저장",

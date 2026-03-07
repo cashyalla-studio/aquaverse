@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
-import { Link, useLocation } from 'react-router-dom'
-import { Fish, Users, ShoppingBag, Droplets, User, Globe } from 'lucide-react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Fish, Users, ShoppingBag, Droplets, User, LogOut } from 'lucide-react'
 import { LOCALE_LABELS, SUPPORTED_LOCALES, isRTL } from '../../i18n'
 import { clsx } from 'clsx'
+import { useAuthStore } from '../../store/authStore'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -11,7 +12,14 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const { t, i18n } = useTranslation()
   const location = useLocation()
+  const navigate = useNavigate()
   const rtl = isRTL(i18n.language)
+  const { isAuthenticated, user, logout } = useAuthStore()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+  }
 
   const navItems = [
     { to: '/', label: t('nav.home'), icon: null },
@@ -68,13 +76,30 @@ export default function Layout({ children }: LayoutProps) {
                 ))}
               </select>
 
-              <Link
-                to="/login"
-                className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-primary-600"
-              >
-                <User size={18} />
-                {t('auth.login')}
-              </Link>
+              {isAuthenticated && user ? (
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                    <User size={16} className="text-primary-500" />
+                    {user.nickname}
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-500 transition-colors px-2 py-1 rounded-lg hover:bg-red-50"
+                    aria-label={t('auth.logout')}
+                  >
+                    <LogOut size={15} />
+                    <span className="hidden sm:inline">{t('auth.logout')}</span>
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-primary-600"
+                >
+                  <User size={18} />
+                  {t('auth.login')}
+                </Link>
+              )}
             </div>
           </div>
         </div>

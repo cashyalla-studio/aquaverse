@@ -1,0 +1,181 @@
+###############################################################################
+# AquaVerse 로컬 통합 테스트용 Docker Compose
+# 사용법: docker compose -f docker-compose.local.yml up --build
+###############################################################################
+
+name: aquaverse-local
+
+services:
+
+  # ────────────────────────────── 인프라 ──────────────────────────────────
+
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: av_postgres
+    environment:
+      POSTGRES_DB: aquaverse_dev
+      POSTGRES_USER: aquaverse
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aquaverse -d aquaverse_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: av_redis
+    command: >
+      redis-server
+      --requirepass devredis
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "devredis", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:RELEASE.2025-01-20T14-49-07Z
+    container_name: av_minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    ports:
+      - "9000:9000"
+      - "9001:9001"    # MinIO Console → http://localhost:9001
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # MinIO 버킷 초기화 (one-shot)
+  minio-init:
+    image: minio/mc:RELEASE.2025-01-09T17-18-09Z
+    container_name: av_minio_init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 minioadmin minioadmin123;
+        mc mb --ignore-existing local/aquaverse;
+        mc mb --ignore-existing local/aquaverse/fish;
+        mc mb --ignore-existing local/aquaverse/listings;
+        mc anonymous set download local/aquaverse/fish;
+        echo '✅ MinIO 버킷 초기화 완료';
+      "
+    restart: on-failure
+
+  # DB 마이그레이션 (one-shot)
+  migrate:
+    image: migrate/migrate:v4.18.1
+    container_name: av_migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./server/migrations:/migrations:ro
+    command: >
+      -path=/migrations
+      -database=postgresql://aquaverse:devpassword@postgres:5432/aquaverse_dev?sslmode=disable
+      up
+    restart: on-failure
+
+  # ────────────────────────────── 앱 ──────────────────────────────────────
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.local
+    container_name: av_api
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    environment:
+      # Viper는 AV_ 접두사 환경변수로 config.yaml을 오버라이드
+      AV_SERVER_PORT: "8080"
+      AV_SERVER_ENV: "development"
+      AV_SERVER_ALLOW_ORIGINS: "http://localhost:3000,http://localhost:5173"
+      AV_DATABASE_DSN: "postgresql://aquaverse:devpassword@postgres:5432/aquaverse_dev?sslmode=disable"
+      AV_DATABASE_MAX_OPEN_CONN: "10"
+      AV_DATABASE_MAX_IDLE_CONN: "3"
+      AV_REDIS_ADDR: "redis:6379"
+      AV_REDIS_PASSWORD: "devredis"
+      AV_REDIS_DB: "0"
+      AV_AUTH_JWT_SECRET: "local-dev-jwt-secret-minimum-32-characters-long!"
+      AV_AUTH_ACCESS_TOKEN_EXPIRY_MIN: "60"
+      AV_AUTH_REFRESH_TOKEN_EXPIRY_DAY: "30"
+      AV_STORAGE_ENDPOINT: "minio:9000"
+      AV_STORAGE_ACCESS_KEY: "minioadmin"
+      AV_STORAGE_SECRET_KEY: "minioadmin123"
+      AV_STORAGE_BUCKET: "aquaverse"
+      AV_STORAGE_USE_SSL: "false"
+      AV_STORAGE_PUBLIC_URL: "http://localhost:9000/aquaverse"
+      AV_AI_PROVIDER: "anthropic"
+      AV_AI_MODEL: "claude-haiku-4-5-20251001"
+      AV_AI_MAX_TOKENS: "2048"
+      # 실제 키는 .env 파일에 설정 (git 제외)
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      AV_CRAWLER_REQUESTS_PER_MINUTE: "10"
+    volumes:
+      - ./server/config.yaml:/app/config.yaml:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      start_period: 20s
+      retries: 6
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.local
+      args:
+        # 브라우저가 직접 호스트의 8080으로 요청 (컨테이너 내부가 아닌 브라우저 기준)
+        VITE_API_URL: "http://localhost:8080"
+    container_name: av_web
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3000:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 10s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: av_postgres_data
+  minio_data:
+    name: av_minio_data

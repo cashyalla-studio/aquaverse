@@ -1,0 +1,28 @@
+# 로컬 개발/테스트용 Dockerfile
+# go.sum 없이도 빌드 가능 (go mod tidy 자동 실행)
+
+FROM golang:1.23-alpine AS builder
+WORKDIR /app
+
+RUN apk add --no-cache git ca-certificates
+
+# 전체 소스 복사 후 tidy → build
+# (캐시 히트율보다 go.sum 부재 호환성을 우선)
+COPY . .
+RUN go mod tidy
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o aquaverse-api ./cmd/server/...
+
+# ── 런타임 이미지 ────────────────────────────────────────────
+FROM alpine:3.20
+RUN apk add --no-cache ca-certificates tzdata wget curl
+WORKDIR /app
+
+COPY --from=builder /app/aquaverse-api .
+COPY config.yaml ./config.yaml
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=6 \
+  CMD wget -qO- http://localhost:8080/health || exit 1
+
+ENTRYPOINT ["./aquaverse-api"]

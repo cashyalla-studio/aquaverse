@@ -14,7 +14,21 @@
     "register": "Create Account",
     "email": "Email",
     "password": "Password",
-    "forgot_password": "Forgot Password?"
+    "confirmPassword": "Confirm Password",
+    "nickname": "Nickname",
+    "locale": "Language / Region",
+    "forgotPassword": "Forgot Password?",
+    "forgot_password": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginSuccess": "Welcome back!",
+    "registerSuccess": "Account created successfully!",
+    "loginError": "Invalid email or password.",
+    "registerError": "Registration failed. Please try again.",
+    "termsAgree": "I agree to the",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "and": "and"
   },
   "common": {
     "save": "Save",

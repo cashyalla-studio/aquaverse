@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/cashyalla/aquaverse/internal/domain"
@@ -54,41 +55,22 @@ func (r *FishRepository) List(ctx context.Context, filter service.FishFilter) ([
 
 	// 페이지네이션
 	offset := (filter.Page - 1) * filter.Limit
-	args = append(args, filter.Limit, offset)
 
-	// 번역 조인 (해당 로케일 우선, 없으면 기본값)
-	q := fmt.Sprintf(`
-		SELECT
-			f.id,
-			f.scientific_name,
-			COALESCE(t.common_name, f.primary_common_name) AS common_name,
-			f.family,
-			f.care_level,
-			f.temperament,
-			f.max_size_cm,
-			f.min_tank_size_liters,
-			f.primary_image_url,
-			f.quality_score
-		FROM fish_data f
-		LEFT JOIN fish_translations t
-			ON t.fish_data_id = f.id AND t.locale = $%d
-		%s
-		ORDER BY f.quality_score DESC, f.id ASC
-		LIMIT $%d OFFSET $%d
-	`, idx, whereClause, idx+1, idx+2)
-
-	args = append([]interface{}{string(filter.Locale)}, args...)
-	// locale이 첫 번째 arg가 되어야 하므로 재조정
-	// locale은 $idx 위치에 있으므로 args에 끝에 추가했다가 재정렬
-	// 실제로는 named query나 sqlx를 쓰는 게 더 낫지만 여기선 직접 처리
-	_ = q
-
-	// 간소화된 쿼리 (locale JOIN 포함)
+	// 번역 조인 (locale=$1 고정, 나머지 필터는 $2~)
+	// locale을 args 맨 앞에 배치하고 WHERE 절 파라미터 인덱스를 $2부터 시작하도록 재조정
 	localeArg := string(filter.Locale)
 	finalArgs := []interface{}{localeArg}
 	finalArgs = append(finalArgs, args...)
 
-	simpleQ := fmt.Sprintf(`
+	// LIMIT/OFFSET 인덱스: finalArgs 현재 길이 + 1, + 2
+	limitIdx := len(finalArgs) + 1
+	offsetIdx := len(finalArgs) + 2
+	finalArgs = append(finalArgs, filter.Limit, offset)
+
+	// whereClause의 파라미터 인덱스($1~)를 $2~로 쉬프트 (locale이 $1을 차지)
+	shiftedWhere := shiftParamIndices(whereClause, 1)
+
+	q := fmt.Sprintf(`
 		SELECT
 			f.id,
 			f.scientific_name,
@@ -105,12 +87,10 @@ func (r *FishRepository) List(ctx context.Context, filter service.FishFilter) ([
 		%s
 		ORDER BY f.quality_score DESC
 		LIMIT $%d OFFSET $%d
-	`, whereClause, len(finalArgs)+1, len(finalArgs)+2)
-
-	finalArgs = append(finalArgs, filter.Limit, offset)
+	`, shiftedWhere, limitIdx, offsetIdx)
 
 	var items []domain.FishListResponse
-	if err := r.db.SelectContext(ctx, &items, simpleQ, finalArgs...); err != nil {
+	if err := r.db.SelectContext(ctx, &items, q, finalArgs...); err != nil {
 		return nil, 0, err
 	}
 	return items, total, nil
@@ -282,4 +262,18 @@ func (r *FishRepository) UpdatePublishStatus(ctx context.Context, id int64, stat
 	q := `UPDATE fish_data SET publish_status = $1, quality_score = $2, updated_at = NOW() WHERE id = $3`
 	_, err := r.db.ExecContext(ctx, q, string(status), score, id)
 	return err
+}
+
+// shiftParamIndices WHERE 절의 PostgreSQL 파라미터 인덱스($N)를 shift만큼 증가시킨다.
+// locale을 $1로 고정한 뒤 기존 WHERE 절의 $1~을 $2~로 밀기 위해 사용한다.
+func shiftParamIndices(clause string, shift int) string {
+	// 뒤에서부터 처리해야 $9 -> $10 치환 시 $1을 재치환하는 문제를 방지한다.
+	// 간단하게 최대 인덱스(99)부터 1까지 역순 치환한다.
+	result := clause
+	for i := 99; i >= 1; i-- {
+		old := "$" + strconv.Itoa(i)
+		new := "$" + strconv.Itoa(i+shift)
+		result = strings.ReplaceAll(result, old, new)
+	}
+	return result
 }

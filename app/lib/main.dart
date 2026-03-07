@@ -11,6 +11,9 @@ import 'features/marketplace/presentation/listing_detail_screen.dart';
 import 'features/marketplace/presentation/create_listing_screen.dart';
 import 'features/community/presentation/community_screen.dart';
 import 'features/tanks/presentation/tanks_screen.dart';
+import 'features/auth/presentation/auth_provider.dart';
+import 'features/auth/presentation/login_screen.dart';
+import 'features/auth/presentation/register_screen.dart';
 import 'l10n/app_localizations.dart';
 
 const _supportedLocales = [
@@ -30,66 +33,119 @@ const _supportedLocales = [
   Locale('he'),
 ];
 
-final _router = GoRouter(
-  initialLocation: '/',
-  routes: [
-    ShellRoute(
-      builder: (context, state, child) => MainScaffold(child: child),
-      routes: [
-        GoRoute(path: '/', builder: (_, __) => const FishListScreen()),
-        GoRoute(path: '/fish', builder: (_, __) => const FishListScreen()),
-        GoRoute(
-          path: '/fish/:id',
-          builder: (_, state) => FishDetailScreen(
-            fishId: int.tryParse(state.pathParameters['id']!) ?? 0,
+bool _requiresAuth(String location) {
+  if (location == '/marketplace/create') return true;
+  // /community/:boardId/create
+  if (location.contains('/community/') && location.endsWith('/create')) return true;
+  return false;
+}
+
+GoRouter _buildRouter(AuthChangeNotifier authNotifier, ProviderContainer container) {
+  return GoRouter(
+    initialLocation: '/',
+    refreshListenable: authNotifier,
+    redirect: (context, state) {
+      final authState = container.read(authProvider);
+
+      // While auth is still initialising, do not redirect
+      if (authState.isLoading) return null;
+
+      final isAuthenticated = authState.isAuthenticated;
+      final location = state.uri.toString();
+      final isOnLogin = location.startsWith('/login');
+      final isOnRegister = location.startsWith('/register');
+
+      // Redirect authenticated users away from /login and /register
+      if (isAuthenticated && (isOnLogin || isOnRegister)) {
+        return '/';
+      }
+
+      // Redirect unauthenticated users away from protected routes
+      if (!isAuthenticated && _requiresAuth(location)) {
+        final encoded = Uri.encodeComponent(location);
+        return '/login?from=$encoded';
+      }
+
+      return null;
+    },
+    routes: [
+      // Auth routes (outside ShellRoute so they have no bottom nav)
+      GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+      GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
+
+      ShellRoute(
+        builder: (context, state, child) => MainScaffold(child: child),
+        routes: [
+          GoRoute(path: '/', builder: (_, __) => const FishListScreen()),
+          GoRoute(path: '/fish', builder: (_, __) => const FishListScreen()),
+          GoRoute(
+            path: '/fish/:id',
+            builder: (_, state) => FishDetailScreen(
+              fishId: int.tryParse(state.pathParameters['id']!) ?? 0,
+            ),
           ),
-        ),
-        GoRoute(path: '/community', builder: (_, __) => const CommunityScreen()),
-        GoRoute(
-          path: '/community/:boardId',
-          builder: (_, state) => BoardScreen(
-            boardId: int.tryParse(state.pathParameters['boardId']!) ?? 0,
-            board: state.extra as dynamic,
+          GoRoute(path: '/community', builder: (_, __) => const CommunityScreen()),
+          GoRoute(
+            path: '/community/:boardId',
+            builder: (_, state) => BoardScreen(
+              boardId: int.tryParse(state.pathParameters['boardId']!) ?? 0,
+              board: state.extra as dynamic,
+            ),
           ),
-        ),
-        GoRoute(
-          path: '/community/:boardId/posts/:postId',
-          builder: (_, state) => PostDetailScreen(
-            boardId: int.tryParse(state.pathParameters['boardId']!) ?? 0,
-            postId: int.tryParse(state.pathParameters['postId']!) ?? 0,
+          GoRoute(
+            path: '/community/:boardId/posts/:postId',
+            builder: (_, state) => PostDetailScreen(
+              boardId: int.tryParse(state.pathParameters['boardId']!) ?? 0,
+              postId: int.tryParse(state.pathParameters['postId']!) ?? 0,
+            ),
           ),
-        ),
-        GoRoute(
-          path: '/community/:boardId/create',
-          builder: (_, state) => CreatePostScreen(
-            boardId: int.tryParse(state.pathParameters['boardId']!) ?? 0,
+          GoRoute(
+            path: '/community/:boardId/create',
+            builder: (_, state) => CreatePostScreen(
+              boardId: int.tryParse(state.pathParameters['boardId']!) ?? 0,
+            ),
           ),
-        ),
-        GoRoute(path: '/marketplace', builder: (_, __) => const MarketplaceScreen()),
-        GoRoute(path: '/marketplace/create', builder: (_, __) => const CreateListingScreen()),
-        GoRoute(
-          path: '/marketplace/:id',
-          builder: (_, state) => ListingDetailScreen(
-            listingId: int.tryParse(state.pathParameters['id']!) ?? 0,
+          GoRoute(path: '/marketplace', builder: (_, __) => const MarketplaceScreen()),
+          GoRoute(path: '/marketplace/create', builder: (_, __) => const CreateListingScreen()),
+          GoRoute(
+            path: '/marketplace/:id',
+            builder: (_, state) => ListingDetailScreen(
+              listingId: int.tryParse(state.pathParameters['id']!) ?? 0,
+            ),
           ),
-        ),
-        GoRoute(path: '/tanks', builder: (_, __) => const TanksScreen()),
-      ],
-    ),
-  ],
-);
+          GoRoute(path: '/tanks', builder: (_, __) => const TanksScreen()),
+        ],
+      ),
+    ],
+  );
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final savedLocale = prefs.getString('av_locale');
 
-  runApp(ProviderScope(child: AquaVerseApp(initialLocale: savedLocale)));
+  // Create a ProviderContainer so we can pass it to the router before runApp
+  final container = ProviderContainer();
+
+  // Read the authChangeNotifier from the container
+  final authNotifier = container.read(authChangeNotifierProvider);
+
+  final router = _buildRouter(authNotifier, container);
+
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: AquaVerseApp(initialLocale: savedLocale, router: router),
+    ),
+  );
 }
 
 class AquaVerseApp extends ConsumerStatefulWidget {
   final String? initialLocale;
-  const AquaVerseApp({super.key, this.initialLocale});
+  final GoRouter router;
+
+  const AquaVerseApp({super.key, this.initialLocale, required this.router});
 
   @override
   ConsumerState<AquaVerseApp> createState() => _AquaVerseAppState();
@@ -125,7 +181,7 @@ class _AquaVerseAppState extends ConsumerState<AquaVerseApp> {
       GlobalWidgetsLocalizations.delegate,
       GlobalCupertinoLocalizations.delegate,
     ],
-    routerConfig: _router,
+    routerConfig: widget.router,
     theme: ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0EA5E9)),
       useMaterial3: true,

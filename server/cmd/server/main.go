@@ -22,6 +22,8 @@ import (
 	"github.com/cashyalla/aquaverse/internal/service"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
+	miniogo "github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/redis/go-redis/v9"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -110,27 +112,41 @@ func main() {
 	aiEnricher := pipeline.NewAIEnricher(
 		cfg.AI.APIKey, cfg.AI.Model, cfg.AI.MaxTokens, logger,
 	)
-	_ = aiEnricher // 크롤러 스케줄러에 주입 예정
+
+	// ── PipelineProcessor ─────────────────────────────────
+	pipelineProcessor := pipeline.NewPipelineProcessor(fishRepo, aiEnricher, logger)
 
 	// ── 크롤러 스케줄러 ───────────────────────────────────
 	fishbaseClient := crawler.NewFishBaseClient(
 		logger, cfg.Crawler.UserAgent, cfg.Crawler.RequestsPerMinute,
 	)
-	_ = fishbaseClient
-	// scheduler := crawler.NewScheduler(fishbaseClient, pipelineProcessor, logger)
-	// scheduler.Start()
-	// defer scheduler.Stop()
+	scheduler := crawler.NewScheduler(fishbaseClient, pipelineProcessor, logger)
+	scheduler.Start()
+	defer scheduler.Stop()
+
+	// ── MinIO 클라이언트 ──────────────────────────────────
+	minioClient, err := miniogo.New(cfg.Storage.Endpoint, &miniogo.Options{
+		Creds:  credentials.NewStaticV4(cfg.Storage.AccessKey, cfg.Storage.SecretKey, ""),
+		Secure: cfg.Storage.UseSSL,
+	})
+	if err != nil {
+		slog.Error("minio client init failed", "err", err)
+		os.Exit(1)
+	}
+	slog.Info("MinIO client initialized", "endpoint", cfg.Storage.Endpoint)
 
 	// ── 핸들러 ────────────────────────────────────────────
 	authH := handler.NewAuthHandler(authSvc)
 	fishH := handler.NewFishHandler(fishSvc)
 	commH := handler.NewCommunityHandler(commSvc)
 	mktH := handler.NewMarketplaceHandler(mktSvc)
+	uploadH := handler.NewUploadHandler(minioClient, cfg.Storage.Bucket)
 
 	// ── Echo 라우터 설정 ───────────────────────────────────
 	e := echo.New()
 	e.HideBanner = true
-	router.Setup(e, cfg, authH, fishH, commH, mktH)
+	router.Setup(e, cfg, authH, fishH, commH, mktH, uploadH)
+	router.SetupHealthCheck(e, db, rdb)
 
 	// ── 그레이스풀 셧다운 ──────────────────────────────────
 	go func() {

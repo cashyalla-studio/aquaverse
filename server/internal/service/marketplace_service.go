@@ -258,7 +258,7 @@ func (s *MarketplaceService) InitiateTrade(ctx context.Context, req InitiateTrad
 
 	trade := &domain.Trade{
 		ListingID:     req.ListingID,
-		BuyerID:       listing.SellerID, // placeholder
+		BuyerID:       req.BuyerID,
 		AgreedPrice:   listing.Price,
 		Currency:      listing.Currency,
 		TradeType:     req.TradeType,

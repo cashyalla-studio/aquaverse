@@ -1,9 +1,10 @@
 import { Suspense, lazy } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { I18nextProvider } from 'react-i18next'
 import i18n from './i18n'
 import Layout from './components/layout/Layout'
+import { useAuthStore } from './store/authStore'
 import './index.css'
 
 const queryClient = new QueryClient({
@@ -18,12 +19,25 @@ const FishDetail = lazy(() => import('./pages/FishDetail'))
 const Community = lazy(() => import('./pages/Community').then((m) => ({ default: m.default })))
 const BoardPage = lazy(() => import('./pages/Community').then((m) => ({ default: m.BoardPage })))
 const Marketplace = lazy(() => import('./pages/Marketplace'))
+const Login = lazy(() => import('./pages/Login'))
+const Register = lazy(() => import('./pages/Register'))
 
 const Spinner = () => (
   <div className="flex h-64 items-center justify-center">
     <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-500 rounded-full animate-spin" />
   </div>
 )
+
+// 인증 필요 라우트 가드
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const location = useLocation()
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />
+  }
+  return <>{children}</>
+}
 
 export default function App() {
   return (
@@ -40,9 +54,17 @@ export default function App() {
                 <Route path="/community/:boardID" element={<BoardPage />} />
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/marketplace/:id" element={<div className="p-8 text-center text-gray-500">Listing Detail (WIP)</div>} />
-                <Route path="/marketplace/create" element={<div className="p-8 text-center text-gray-500">Create Listing (WIP)</div>} />
+                <Route
+                  path="/marketplace/create"
+                  element={
+                    <PrivateRoute>
+                      <div className="p-8 text-center text-gray-500">Create Listing (WIP)</div>
+                    </PrivateRoute>
+                  }
+                />
                 <Route path="/tanks" element={<div className="p-8 text-center text-gray-500">My Tanks (WIP)</div>} />
-                <Route path="/login" element={<div className="p-8 text-center text-gray-500">Login (WIP)</div>} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
               </Routes>
             </Suspense>
           </Layout>

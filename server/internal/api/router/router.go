@@ -1,13 +1,17 @@
 package router
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"github.com/cashyalla/aquaverse/internal/api/handler"
 	"github.com/cashyalla/aquaverse/internal/api/middleware"
 	"github.com/cashyalla/aquaverse/internal/config"
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	echomw "github.com/labstack/echo/v4/middleware"
+	"github.com/redis/go-redis/v9"
 )
 
 func Setup(
@@ -17,6 +21,7 @@ func Setup(
 	fishH *handler.FishHandler,
 	commH *handler.CommunityHandler,
 	mktH *handler.MarketplaceHandler,
+	uploadH *handler.UploadHandler,
 ) {
 	// 글로벌 미들웨어
 	e.Use(echomw.Logger())
@@ -25,7 +30,7 @@ func Setup(
 	e.Use(echomw.RequestID())
 	e.Use(middleware.LocaleMiddleware())
 
-	// 헬스체크
+	// 헬스체크 (기본)
 	e.GET("/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"status": "ok", "version": "1.0.0"})
 	})
@@ -81,10 +86,56 @@ func Setup(
 	fraud := api.Group("/fraud-reports", middleware.JWTAuth(cfg.Auth.JWTSecret))
 	fraud.POST("", mktH.ReportFraud)
 
+	// ── 파일 업로드 (인증 필요) ─────────────────────────────
+	upload := api.Group("/upload", middleware.JWTAuth(cfg.Auth.JWTSecret))
+	upload.POST("/presign", uploadH.PresignUpload)
+
 	// ── 관리자 (ADMIN 역할 필요) ───────────────────────────
 	admin := api.Group("/admin",
 		middleware.JWTAuth(cfg.Auth.JWTSecret),
 		middleware.RequireRole("ADMIN"),
 	)
 	_ = admin // 관리자 핸들러는 별도 구현
+}
+
+// SetupHealthCheck DB와 Redis ping을 포함하는 강화된 헬스체크를 등록한다.
+// Setup 호출 이후 별도로 호출하여 /health 라우트를 덮어쓴다.
+func SetupHealthCheck(e *echo.Echo, db *sqlx.DB, rdb *redis.Client) {
+	e.GET("/health", func(c echo.Context) error {
+		ctx, cancel := context.WithTimeout(c.Request().Context(), 3*time.Second)
+		defer cancel()
+
+		type componentStatus struct {
+			Status string `json:"status"`
+			Error  string `json:"error,omitempty"`
+		}
+
+		dbStatus := componentStatus{Status: "ok"}
+		if err := db.PingContext(ctx); err != nil {
+			dbStatus.Status = "error"
+			dbStatus.Error = err.Error()
+		}
+
+		redisStatus := componentStatus{Status: "ok"}
+		if err := rdb.Ping(ctx).Err(); err != nil {
+			redisStatus.Status = "error"
+			redisStatus.Error = err.Error()
+		}
+
+		overall := "ok"
+		httpStatus := http.StatusOK
+		if dbStatus.Status != "ok" || redisStatus.Status != "ok" {
+			overall = "degraded"
+			httpStatus = http.StatusServiceUnavailable
+		}
+
+		return c.JSON(httpStatus, map[string]interface{}{
+			"status":  overall,
+			"version": "1.0.0",
+			"components": map[string]interface{}{
+				"database": dbStatus,
+				"redis":    redisStatus,
+			},
+		})
+	})
 }

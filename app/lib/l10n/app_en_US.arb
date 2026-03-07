@@ -16,6 +16,11 @@
   "authEmail": "Email",
   "authPassword": "Password",
   "authForgotPassword": "Forgot Password?",
+  "authNickname": "Nickname",
+  "authConfirmPassword": "Confirm Password",
+  "authLocale": "Language",
+  "authCreateAccount": "Create Account",
+  "authRegisterSuccess": "Registration complete! Please sign in.",
 
   "commonSave": "Save",
   "commonCancel": "Cancel",
