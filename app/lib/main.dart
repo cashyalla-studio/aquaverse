@@ -1,3 +1,4 @@
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -133,6 +134,18 @@ GoRouter _buildRouter(AuthChangeNotifier authNotifier, ProviderContainer contain
   );
 }
 
+/// `/trades/:tradeId/chat` 경로인지 확인하고 tradeId를 반환한다.
+String? _extractTradeId(Uri uri) {
+  final segments = uri.pathSegments;
+  // 경로: /trades/{tradeId}/chat  → segments = ['trades', tradeId, 'chat']
+  if (segments.length == 3 &&
+      segments[0] == 'trades' &&
+      segments[2] == 'chat') {
+    return segments[1];
+  }
+  return null;
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
@@ -145,6 +158,32 @@ Future<void> main() async {
   final authNotifier = container.read(authChangeNotifierProvider);
 
   final router = _buildRouter(authNotifier, container);
+
+  // --- 딥링크 처리 (app_links) ---
+  final appLinks = AppLinks();
+
+  // 앱이 종료된 상태에서 딥링크로 실행된 경우 초기 링크 처리
+  final initialUri = await appLinks.getInitialLink();
+  if (initialUri != null) {
+    final tradeId = _extractTradeId(initialUri);
+    if (tradeId != null) {
+      // router가 준비된 후 이동하도록 addPostFrameCallback 대신
+      // router의 redirect 로직이 동작할 수 있도록 직접 go() 호출은
+      // runApp 이후 첫 프레임에서 수행한다.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        router.go('/trades/$tradeId/chat');
+      });
+    }
+  }
+
+  // 앱이 백그라운드/포그라운드 상태일 때 수신되는 딥링크 스트림 구독
+  appLinks.uriLinkStream.listen((uri) {
+    final tradeId = _extractTradeId(uri);
+    if (tradeId != null) {
+      router.go('/trades/$tradeId/chat');
+    }
+  });
+  // --- 딥링크 처리 끝 ---
 
   runApp(
     UncontrolledProviderScope(

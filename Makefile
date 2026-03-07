@@ -2,7 +2,8 @@
 
 .PHONY: server web app infra migrate dev-up dev-down build-all \
         local-up local-down local-build local-logs local-ps local-clean \
-        app-run-android app-run-ios app-run-chrome app-run-device app-codegen
+        app-run-android app-run-ios app-run-chrome app-run-device app-codegen \
+        monitoring-up monitoring-down
 
 # ── 서버 ──────────────────────────────────────────────
 server-run:
@@ -172,6 +173,13 @@ app-run-device:
 ## 자동 플랫폼 감지 실행 스크립트
 app-run:
 	bash scripts/flutter-run-local.sh $(PLATFORM)
+
+## Monitoring
+monitoring-up: ## Prometheus + Grafana 시작
+	docker compose -f docker-compose.local.yml up -d prometheus grafana
+
+monitoring-down: ## Prometheus + Grafana 중지
+	docker compose -f docker-compose.local.yml stop prometheus grafana
 
 # ── 전체 ─────────────────────────────────────────────
 build-all: server-build web-build

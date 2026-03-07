@@ -49,6 +49,9 @@ dependencies:
   firebase_messaging: ^15.1.0
   flutter_local_notifications: ^17.2.2
 
+  # 딥링크
+  app_links: ^6.3.4
+
   # 기타
   url_launcher: ^6.3.0
   share_plus: ^10.0.2

@@ -27,6 +27,7 @@ func Setup(
 	metricsH *handler.MetricsHandler,
 	citesH *handler.CitesHandler,
 	escrowH *handler.EscrowHandler,
+	compatH *handler.CompatibilityHandler,
 ) {
 	// 글로벌 미들웨어
 	e.Use(echomw.Logger())
@@ -60,6 +61,12 @@ func Setup(
 	fish.GET("/search", fishH.Search)
 	fish.GET("/families", fishH.ListFamilies)
 	fish.GET("/:id", fishH.Get)
+	fish.GET("/:id/compatible", compatH.GetCompatibleFish)
+
+	// ── 수조 (인증 필요) ───────────────────────────────────
+	tanks := api.Group("/tanks", middleware.JWTAuth(cfg.Auth.JWTSecret))
+	tanks.GET("/:id/recommend", compatH.RecommendForTank)
+	tanks.GET("/:id/inhabitants", compatH.GetTankInhabitants)
 
 	// ── 커뮤니티 (게시판) ──────────────────────────────────
 	boards := api.Group("/boards")

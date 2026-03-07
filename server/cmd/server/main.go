@@ -117,6 +117,9 @@ func main() {
 	// 에스크로 서비스
 	escrowSvc := service.NewEscrowService(db)
 
+	// 합사 호환성 서비스
+	compatSvc := service.NewCompatibilityService(db)
+
 	// 이미지 처리 워커 (goroutine)
 	imageWorker := service.NewImageWorker(db, rdb)
 	go imageWorker.StartWorker(appCtx)
@@ -159,11 +162,12 @@ func main() {
 	metricsH := handler.NewMetricsHandler()
 	citesH := handler.NewCitesHandler(citesRepo)
 	escrowH := handler.NewEscrowHandler(escrowSvc)
+	compatH := handler.NewCompatibilityHandler(compatSvc)
 
 	// ── Echo 라우터 설정 ───────────────────────────────────
 	e := echo.New()
 	e.HideBanner = true
-	router.Setup(e, cfg, authH, fishH, commH, mktH, uploadH, chatH, phoneH, metricsH, citesH, escrowH)
+	router.Setup(e, cfg, authH, fishH, commH, mktH, uploadH, chatH, phoneH, metricsH, citesH, escrowH, compatH)
 	router.SetupHealthCheck(e, db, rdb)
 
 	// ── 그레이스풀 셧다운 ──────────────────────────────────

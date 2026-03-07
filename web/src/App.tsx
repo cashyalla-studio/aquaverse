@@ -24,6 +24,7 @@ const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
 const TradeChat = lazy(() => import('./pages/trade/TradeChat'))
 const PhoneVerify = lazy(() => import('./pages/auth/PhoneVerify'))
+const FishCompatibility = lazy(() => import('./pages/fish/FishCompatibility'))
 
 const Spinner = () => (
   <div className="flex h-64 items-center justify-center">
@@ -53,6 +54,7 @@ export default function App() {
                 <Route path="/" element={<FishEncyclopedia />} />
                 <Route path="/fish" element={<FishEncyclopedia />} />
                 <Route path="/fish/:id" element={<FishDetail />} />
+                <Route path="/fish/:id/compatible" element={<FishCompatibility />} />
                 <Route path="/community" element={<Community />} />
                 <Route path="/community/:boardID" element={<BoardPage />} />
                 <Route path="/marketplace" element={<Marketplace />} />
