@@ -54,6 +54,20 @@ func (h *CompatibilityHandler) RecommendForTank(c echo.Context) error {
 	})
 }
 
+// CheckWithClaude GET /api/v1/fish/check-compat?a=1&b=2
+func (h *CompatibilityHandler) CheckWithClaude(c echo.Context) error {
+	aID, _ := strconv.ParseInt(c.QueryParam("a"), 10, 64)
+	bID, _ := strconv.ParseInt(c.QueryParam("b"), 10, 64)
+	if aID == 0 || bID == 0 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "a, b 파라미터 필요"})
+	}
+	result, err := h.svc.ClaudeFallbackCheck(c.Request().Context(), aID, bID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
 // GetTankInhabitants GET /api/v1/tanks/:id/inhabitants
 func (h *CompatibilityHandler) GetTankInhabitants(c echo.Context) error {
 	tankID, err := strconv.ParseInt(c.Param("id"), 10, 64)

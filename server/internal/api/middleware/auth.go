@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -93,6 +94,16 @@ func MustGetUserID(c echo.Context) uuid.UUID {
 	}
 	id, _ := uuid.Parse(claims)
 	return id
+}
+
+// GetUserID JWT claims에서 userID를 추출하여 UUID와 에러를 반환한다.
+// 인증이 선택적인 엔드포인트에서 사용한다.
+func GetUserID(c echo.Context) (uuid.UUID, error) {
+	userIDStr, ok := c.Get(ContextKeyUserID).(string)
+	if !ok || userIDStr == "" {
+		return uuid.Nil, fmt.Errorf("not authenticated")
+	}
+	return uuid.Parse(userIDStr)
 }
 
 // RequireRole - 특정 역할 요구

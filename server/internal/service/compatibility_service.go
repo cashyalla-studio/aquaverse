@@ -2,17 +2,24 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/cashyalla/aquaverse/internal/domain"
 	"github.com/jmoiron/sqlx"
+	"github.com/redis/go-redis/v9"
 )
 
 type CompatibilityService struct {
-	db *sqlx.DB
+	db  *sqlx.DB
+	rdb *redis.Client
 }
 
-func NewCompatibilityService(db *sqlx.DB) *CompatibilityService {
-	return &CompatibilityService{db: db}
+func NewCompatibilityService(db *sqlx.DB, rdb *redis.Client) *CompatibilityService {
+	return &CompatibilityService{db: db, rdb: rdb}
 }
 
 // CheckCompatibility 두 어종 간 호환성 체크
@@ -102,8 +109,18 @@ func (s *CompatibilityService) ruleBasedCheck(ctx context.Context, fishAID, fish
 	}, nil
 }
 
-// GetCompatibleFish 특정 어종과 합사 가능한 어종 목록
+// GetCompatibleFish 특정 어종과 합사 가능한 어종 목록 (Redis 24h 캐시)
 func (s *CompatibilityService) GetCompatibleFish(ctx context.Context, fishID int64) ([]domain.FishRecommendation, error) {
+	cacheKey := fmt.Sprintf("compat:fish:%d", fishID)
+
+	// Redis 캐시 확인
+	if cached, err := s.rdb.Get(ctx, cacheKey).Bytes(); err == nil {
+		var result []domain.FishRecommendation
+		if json.Unmarshal(cached, &result) == nil {
+			return result, nil
+		}
+	}
+
 	rows, err := s.db.QueryxContext(ctx, `
         SELECT
             fd.id as fish_id,
@@ -132,7 +149,68 @@ func (s *CompatibilityService) GetCompatibleFish(ctx context.Context, fishID int
 		}
 		result = append(result, r)
 	}
+
+	// 캐시 저장 (24시간)
+	if data, err := json.Marshal(result); err == nil {
+		s.rdb.Set(ctx, cacheKey, data, 24*time.Hour)
+	}
+
 	return result, nil
+}
+
+// ClaudeFallbackCheck Rule-based 결과가 없을 때 Claude AI로 합사 가능 여부를 판단한다.
+func (s *CompatibilityService) ClaudeFallbackCheck(ctx context.Context, fishAID, fishBID int64) (*domain.CompatibilityResult, error) {
+	type fishInfo struct {
+		ID          int64  `db:"id"`
+		CommonName  string `db:"common_name"`
+		ScientName  string `db:"scientific_name"`
+		Temperament string `db:"temperament"`
+	}
+
+	var fishA, fishB fishInfo
+	s.db.GetContext(ctx, &fishA, `SELECT id, COALESCE(common_name,'') as common_name, COALESCE(scientific_name,'') as scientific_name, COALESCE(temperament,'peaceful') as temperament FROM fish_data WHERE id=$1`, fishAID)
+	s.db.GetContext(ctx, &fishB, `SELECT id, COALESCE(common_name,'') as common_name, COALESCE(scientific_name,'') as scientific_name, COALESCE(temperament,'peaceful') as temperament FROM fish_data WHERE id=$1`, fishBID)
+
+	if fishA.CommonName == "" || fishB.CommonName == "" {
+		return &domain.CompatibilityResult{Compatible: true, Source: "unknown"}, nil
+	}
+
+	apiKey := os.Getenv("ANTHROPIC_API_KEY")
+	if apiKey == "" {
+		return &domain.CompatibilityResult{Compatible: true, Source: "claude-unavailable"}, nil
+	}
+
+	prompt := fmt.Sprintf(`두 열대어의 합사 가능 여부를 JSON으로만 답하세요.
+어종A: %s (%s), 기질: %s
+어종B: %s (%s), 기질: %s
+형식: {"compatible": true/false, "caution": true/false, "reason": "이유"}`,
+		fishA.CommonName, fishA.ScientName, fishA.Temperament,
+		fishB.CommonName, fishB.ScientName, fishB.Temperament,
+	)
+
+	result, err := callClaudeSimple(ctx, apiKey, prompt)
+	if err != nil {
+		return &domain.CompatibilityResult{Compatible: true, Source: "claude-error"}, nil
+	}
+
+	var parsed struct {
+		Compatible bool   `json:"compatible"`
+		Caution    bool   `json:"caution"`
+		Reason     string `json:"reason"`
+	}
+	// JSON 추출
+	if start := strings.Index(result, "{"); start >= 0 {
+		if end := strings.LastIndex(result, "}"); end >= start {
+			json.Unmarshal([]byte(result[start:end+1]), &parsed)
+		}
+	}
+
+	return &domain.CompatibilityResult{
+		Compatible: parsed.Compatible,
+		Caution:    parsed.Caution,
+		Reason:     parsed.Reason,
+		Source:     "claude",
+	}, nil
 }
 
 // RecommendForTank 수조 기반 추천 어종

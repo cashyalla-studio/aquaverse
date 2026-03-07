@@ -67,3 +67,27 @@ func (h *TankDoctorHandler) GetDiagnosis(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, diag)
 }
+
+// OCRWaterParams POST /api/v1/tanks/:id/ocr-params
+// Body: {"image": "base64...", "media_type": "image/jpeg"}
+func (h *TankDoctorHandler) OCRWaterParams(c echo.Context) error {
+	tankID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid tank id"})
+	}
+	var req struct {
+		Image     string `json:"image"`      // base64
+		MediaType string `json:"media_type"` // image/jpeg
+	}
+	if err := c.Bind(&req); err != nil || req.Image == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "image 필수"})
+	}
+	if req.MediaType == "" {
+		req.MediaType = "image/jpeg"
+	}
+	params, err := h.svc.OCRWaterParams(c.Request().Context(), tankID, req.Image, req.MediaType)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, params)
+}

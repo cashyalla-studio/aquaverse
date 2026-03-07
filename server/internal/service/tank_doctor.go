@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/cashyalla/aquaverse/internal/domain"
@@ -257,4 +258,35 @@ func (s *TankDoctorService) callClaude(ctx context.Context, tankID int64, prompt
 	}
 
 	return diag, nil
+}
+
+// OCRWaterParams Claude Vision으로 수질 키트 이미지에서 수치를 추출한다.
+func (s *TankDoctorService) OCRWaterParams(ctx context.Context, tankID int64, base64Image, mediaType string) (*domain.WaterParams, error) {
+	if s.apiKey == "" {
+		return nil, fmt.Errorf("ANTHROPIC_API_KEY 미설정")
+	}
+
+	prompt := `이 수질 테스트 키트 이미지에서 수치를 읽어 JSON으로만 답하세요.
+형식: {"temp_c": 26.0, "ph": 7.2, "ammonia_ppm": 0.0, "nitrite_ppm": 0.0, "nitrate_ppm": 10.0}
+읽을 수 없는 항목은 null로 표시. 다른 텍스트 없이 JSON만 출력.`
+
+	text, err := callClaudeWithImage(ctx, s.apiKey, base64Image, mediaType, prompt)
+	if err != nil {
+		return nil, fmt.Errorf("OCR 실패: %w", err)
+	}
+
+	// JSON 추출
+	start := strings.Index(text, "{")
+	end := strings.LastIndex(text, "}")
+	if start < 0 || end < start {
+		return nil, fmt.Errorf("OCR 응답 파싱 실패: %s", text)
+	}
+	jsonStr := text[start : end+1]
+
+	var params domain.WaterParams
+	if err := json.Unmarshal([]byte(jsonStr), &params); err != nil {
+		return nil, fmt.Errorf("수치 파싱 실패: %w", err)
+	}
+	params.TankID = tankID
+	return &params, nil
 }

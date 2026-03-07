@@ -32,6 +32,8 @@ func Setup(
 	paymentH *handler.PaymentHandler,
 	businessH *handler.BusinessHandler,
 	notifH *handler.NotificationHandler,
+	videoH *handler.VideoHandler,
+	subH *handler.SubscriptionHandler,
 ) {
 	// 글로벌 미들웨어
 	e.Use(echomw.Logger())
@@ -66,6 +68,7 @@ func Setup(
 	fish.GET("/families", fishH.ListFamilies)
 	fish.GET("/:id", fishH.Get)
 	fish.GET("/:id/compatible", compatH.GetCompatibleFish)
+	fish.GET("/check-compat", compatH.CheckWithClaude)
 
 	// ── 수조 (인증 필요) ───────────────────────────────────
 	tanks := api.Group("/tanks", middleware.JWTAuth(cfg.Auth.JWTSecret))
@@ -74,6 +77,7 @@ func Setup(
 	tanks.POST("/:id/water-params", tankDoctorH.RecordWaterParams)
 	tanks.GET("/:id/water-params", tankDoctorH.GetWaterHistory)
 	tanks.GET("/:id/diagnosis", tankDoctorH.GetDiagnosis)
+	tanks.POST("/:id/ocr-params", tankDoctorH.OCRWaterParams)
 
 	// ── 커뮤니티 (게시판) ──────────────────────────────────
 	boards := api.Group("/boards")
@@ -157,6 +161,23 @@ func Setup(
 	notif := api.Group("/notifications", middleware.JWTAuth(cfg.Auth.JWTSecret))
 	notif.POST("/fcm/register", notifH.RegisterToken)
 	notif.DELETE("/fcm/unregister", notifH.UnregisterToken)
+
+	// ── 영상 피드 (GET 공개, 나머지 인증 필요) ─────────────
+	videos := api.Group("/videos")
+	videos.GET("", videoH.GetFeed)
+
+	authVideos := videos.Group("", middleware.JWTAuth(cfg.Auth.JWTSecret))
+	authVideos.POST("", videoH.CreatePost)
+	authVideos.POST("/:id/like", videoH.LikePost)
+	authVideos.POST("/:id/view", videoH.IncrementView)
+	authVideos.DELETE("/:id", videoH.DeletePost)
+
+	// ── 구독 (플랜 조회는 공개) ────────────────────────────
+	api.GET("/subscriptions/plans", subH.GetPlans)
+	subscriptions := api.Group("/subscriptions", middleware.JWTAuth(cfg.Auth.JWTSecret))
+	subscriptions.GET("/me", subH.GetMySubscription)
+	subscriptions.POST("/subscribe", subH.Subscribe)
+	subscriptions.POST("/cancel", subH.Cancel)
 
 	// ── 관리자 (ADMIN 역할 필요) ───────────────────────────
 	admin := api.Group("/admin",

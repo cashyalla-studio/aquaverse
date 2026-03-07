@@ -121,7 +121,7 @@ func main() {
 	escrowSvc := service.NewEscrowService(db, fcmSvc)
 
 	// 합사 호환성 서비스
-	compatSvc := service.NewCompatibilityService(db)
+	compatSvc := service.NewCompatibilityService(db, rdb)
 
 	// 이미지 처리 워커 (goroutine)
 	imageWorker := service.NewImageWorker(db, rdb)
@@ -182,10 +182,18 @@ func main() {
 	// FCM 알림 핸들러
 	notifH := handler.NewNotificationHandler(fcmSvc)
 
+	// 영상 피드 서비스 및 핸들러
+	videoSvc := service.NewVideoService(db, minioClient)
+	videoH := handler.NewVideoHandler(videoSvc)
+
+	// 구독 서비스 및 핸들러
+	subSvc := service.NewSubscriptionService(db)
+	subH := handler.NewSubscriptionHandler(subSvc)
+
 	// ── Echo 라우터 설정 ───────────────────────────────────
 	e := echo.New()
 	e.HideBanner = true
-	router.Setup(e, cfg, authH, fishH, commH, mktH, uploadH, chatH, phoneH, metricsH, citesH, escrowH, compatH, tankDoctorH, paymentH, businessH, notifH)
+	router.Setup(e, cfg, authH, fishH, commH, mktH, uploadH, chatH, phoneH, metricsH, citesH, escrowH, compatH, tankDoctorH, paymentH, businessH, notifH, videoH, subH)
 	router.SetupHealthCheck(e, db, rdb)
 
 	// ── 그레이스풀 셧다운 ──────────────────────────────────

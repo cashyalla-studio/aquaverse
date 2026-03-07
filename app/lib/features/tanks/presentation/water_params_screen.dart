@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/api/api_client.dart';
 
 class WaterParamsScreen extends ConsumerStatefulWidget {
@@ -19,6 +22,37 @@ class _WaterParamsScreenState extends ConsumerState<WaterParamsScreen> {
   bool _loading = false;
 
   double? _parseDouble(String s) => s.isEmpty ? null : double.tryParse(s);
+
+  Future<void> _ocrFromImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.camera, imageQuality: 70);
+    if (picked == null) return;
+
+    setState(() => _loading = true);
+    try {
+      final bytes = await picked.readAsBytes();
+      final base64Image = base64Encode(bytes);
+      final dio = ref.read(dioProvider('ko'));
+      final resp = await dio.post('/tanks/${widget.tankId}/ocr-params', data: {
+        'image': base64Image,
+        'media_type': 'image/jpeg',
+      });
+      final data = resp.data as Map<String, dynamic>;
+      // 텍스트 필드 자동 입력
+      if (data['temp_c'] != null) _tempC.text = data['temp_c'].toString();
+      if (data['ph'] != null) _ph.text = data['ph'].toString();
+      if (data['ammonia_ppm'] != null) _ammonia.text = data['ammonia_ppm'].toString();
+      if (data['nitrite_ppm'] != null) _nitrite.text = data['nitrite_ppm'].toString();
+      if (data['nitrate_ppm'] != null) _nitrate.text = data['nitrate_ppm'].toString();
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('수질 키트 인식 완료!')));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('OCR 오류: $e'), backgroundColor: Colors.red));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   Future<void> _submit() async {
     setState(() => _loading = true);
@@ -59,7 +93,16 @@ class _WaterParamsScreenState extends ConsumerState<WaterParamsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('수질 기록')),
+      appBar: AppBar(
+        title: const Text('수질 기록'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.camera_alt),
+            tooltip: '수질 키트 촬영 (OCR)',
+            onPressed: _loading ? null : _ocrFromImage,
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
