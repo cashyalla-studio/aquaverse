@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cashyalla/aquaverse/internal/domain"
+	"github.com/cashyalla/aquaverse/internal/service"
 	"github.com/labstack/echo/v4"
 )
 

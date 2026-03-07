@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/cashyalla/aquaverse/internal/domain"
-	"github.com/cashyalla/aquaverse/internal/service"
 	"github.com/redis/go-redis/v9"
 )
 
