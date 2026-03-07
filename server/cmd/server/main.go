@@ -164,10 +164,18 @@ func main() {
 	escrowH := handler.NewEscrowHandler(escrowSvc)
 	compatH := handler.NewCompatibilityHandler(compatSvc)
 
+	// 수조 주치의 서비스 및 핸들러
+	tankDoctorSvc := service.NewTankDoctorService(db, rdb)
+	tankDoctorH := handler.NewTankDoctorHandler(tankDoctorSvc)
+
+	// PG 결제 서비스 및 핸들러
+	paymentSvc := service.NewPaymentService(db)
+	paymentH := handler.NewPaymentHandler(paymentSvc)
+
 	// ── Echo 라우터 설정 ───────────────────────────────────
 	e := echo.New()
 	e.HideBanner = true
-	router.Setup(e, cfg, authH, fishH, commH, mktH, uploadH, chatH, phoneH, metricsH, citesH, escrowH, compatH)
+	router.Setup(e, cfg, authH, fishH, commH, mktH, uploadH, chatH, phoneH, metricsH, citesH, escrowH, compatH, tankDoctorH, paymentH)
 	router.SetupHealthCheck(e, db, rdb)
 
 	// ── 그레이스풀 셧다운 ──────────────────────────────────

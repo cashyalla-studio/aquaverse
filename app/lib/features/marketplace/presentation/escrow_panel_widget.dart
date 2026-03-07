@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/api/api_client.dart';
 
 enum EscrowStatus { pending, funded, released, refunded, disputed }
@@ -49,6 +50,39 @@ class EscrowPanelWidget extends ConsumerStatefulWidget {
 class _EscrowPanelWidgetState extends ConsumerState<EscrowPanelWidget> {
   bool _loading = false;
   String? _error;
+
+  Future<void> _doFund() async {
+    setState(() { _loading = true; _error = null; });
+    try {
+      final dio = ref.read(dioProvider('ko'));
+      final res = await dio.post<Map<String, dynamic>>(
+        '/trades/${widget.tradeId}/payment/initiate',
+      );
+      final data = res.data ?? {};
+      final isSandbox = data['is_sandbox'] as bool? ?? true;
+      final checkoutUrl = data['checkout_url'] as String? ?? '';
+
+      if (isSandbox) {
+        // 샌드박스 모드: 바로 mock-confirm 호출
+        await dio.post<void>('/trades/${widget.tradeId}/payment/mock-confirm');
+        ref.invalidate(escrowStatusProvider(widget.tradeId));
+      } else {
+        // 실제 PG: url_launcher로 결제창 열기
+        final uri = Uri.parse(checkoutUrl);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
+      }
+    } on DioException catch (e) {
+      setState(() {
+        _error = e.response?.data?['error'] as String?
+            ?? e.response?.data?['message'] as String?
+            ?? '결제 초기화 실패';
+      });
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
 
   Future<void> _doAction(String action) async {
     setState(() { _loading = true; _error = null; });
@@ -132,7 +166,7 @@ class _EscrowPanelWidgetState extends ConsumerState<EscrowPanelWidget> {
           if (widget.isBuyer && status == EscrowStatus.pending) ...[
             const SizedBox(height: 12),
             FilledButton(
-              onPressed: _loading ? null : () => _doAction('fund'),
+              onPressed: _loading ? null : _doFund,
               style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(44)),
               child: _loading
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))

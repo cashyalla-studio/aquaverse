@@ -28,6 +28,8 @@ func Setup(
 	citesH *handler.CitesHandler,
 	escrowH *handler.EscrowHandler,
 	compatH *handler.CompatibilityHandler,
+	tankDoctorH *handler.TankDoctorHandler,
+	paymentH *handler.PaymentHandler,
 ) {
 	// 글로벌 미들웨어
 	e.Use(echomw.Logger())
@@ -67,6 +69,9 @@ func Setup(
 	tanks := api.Group("/tanks", middleware.JWTAuth(cfg.Auth.JWTSecret))
 	tanks.GET("/:id/recommend", compatH.RecommendForTank)
 	tanks.GET("/:id/inhabitants", compatH.GetTankInhabitants)
+	tanks.POST("/:id/water-params", tankDoctorH.RecordWaterParams)
+	tanks.GET("/:id/water-params", tankDoctorH.GetWaterHistory)
+	tanks.GET("/:id/diagnosis", tankDoctorH.GetDiagnosis)
 
 	// ── 커뮤니티 (게시판) ──────────────────────────────────
 	boards := api.Group("/boards")
@@ -104,6 +109,13 @@ func Setup(
 	escrow.POST("/fund", escrowH.Fund)
 	escrow.POST("/release", escrowH.Release)
 	escrow.POST("/refund", escrowH.Refund)
+
+	// PG 결제
+	trades.POST("/:id/payment/initiate", paymentH.InitiatePayment)
+	trades.POST("/:id/payment/mock-confirm", paymentH.MockConfirm)
+
+	// 토스페이먼츠 웹훅 (공개 엔드포인트 - 인증 없음)
+	api.POST("/webhooks/payment", paymentH.Webhook)
 
 	// CITES 멸종위기 어종 체크 (공개)
 	api.GET("/cites/check", citesH.Check)

@@ -21,7 +21,29 @@ export function EscrowPanel({ tradeId, isBuyer, tradeAmount, currency = 'KRW' }:
       .catch(() => setStatus(null))
   }, [tradeId])
 
-  const handleAction = async (action: 'fund' | 'release' | 'refund') => {
+  const handleFund = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const res = await api.post<{ checkout_url: string; is_sandbox: boolean }>(`/trades/${tradeId}/payment/initiate`)
+      const { checkout_url, is_sandbox } = res.data
+      if (is_sandbox) {
+        // 개발 모드: 바로 mock-confirm
+        await api.post(`/trades/${tradeId}/payment/mock-confirm`)
+        const statusRes = await api.get<{ escrow_status: EscrowStatus }>(`/trades/${tradeId}/escrow`)
+        setStatus(statusRes.data.escrow_status)
+      } else {
+        window.open(checkout_url, '_blank')
+      }
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { error?: string; message?: string } } }
+      setError(err.response?.data?.error || err.response?.data?.message || '결제 초기화 실패')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAction = async (action: 'release' | 'refund') => {
     setLoading(true)
     setError('')
     try {
@@ -70,7 +92,7 @@ export function EscrowPanel({ tradeId, isBuyer, tradeAmount, currency = 'KRW' }:
       <div className="flex gap-2">
         {isBuyer && status === 'PENDING' && (
           <button
-            onClick={() => handleAction('fund')}
+            onClick={handleFund}
             disabled={loading}
             className="flex-1 py-2 bg-blue-600 text-white text-sm rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
           >

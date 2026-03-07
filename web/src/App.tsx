@@ -25,6 +25,7 @@ const Register = lazy(() => import('./pages/Register'))
 const TradeChat = lazy(() => import('./pages/trade/TradeChat'))
 const PhoneVerify = lazy(() => import('./pages/auth/PhoneVerify'))
 const FishCompatibility = lazy(() => import('./pages/fish/FishCompatibility'))
+const TankDoctorPage = lazy(() => import('./pages/tanks/TankDoctorPage'))
 
 const Spinner = () => (
   <div className="flex h-64 items-center justify-center">
@@ -68,6 +69,14 @@ export default function App() {
                   }
                 />
                 <Route path="/tanks" element={<div className="p-8 text-center text-gray-500">My Tanks (WIP)</div>} />
+                <Route
+                  path="/tanks/:id/doctor"
+                  element={
+                    <PrivateRoute>
+                      <TankDoctorPage />
+                    </PrivateRoute>
+                  }
+                />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route
