@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -81,6 +82,17 @@ func OptionalJWTAuth(secret string) echo.MiddlewareFunc {
 			return next(c)
 		}
 	}
+}
+
+// MustGetUserID JWT claims에서 userID를 추출하여 UUID로 반환한다.
+// JWTAuth 미들웨어가 설정한 claims를 사용하며, 파싱 실패 시 uuid.Nil을 반환한다.
+func MustGetUserID(c echo.Context) uuid.UUID {
+	claims, ok := c.Get(ContextKeyUserID).(string)
+	if !ok {
+		return uuid.Nil
+	}
+	id, _ := uuid.Parse(claims)
+	return id
 }
 
 // RequireRole - 특정 역할 요구

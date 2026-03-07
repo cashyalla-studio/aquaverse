@@ -21,6 +21,8 @@ const BoardPage = lazy(() => import('./pages/Community').then((m) => ({ default:
 const Marketplace = lazy(() => import('./pages/Marketplace'))
 const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
+const TradeChat = lazy(() => import('./pages/trade/TradeChat'))
+const PhoneVerify = lazy(() => import('./pages/auth/PhoneVerify'))
 
 const Spinner = () => (
   <div className="flex h-64 items-center justify-center">
@@ -65,6 +67,22 @@ export default function App() {
                 <Route path="/tanks" element={<div className="p-8 text-center text-gray-500">My Tanks (WIP)</div>} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route
+                  path="/trades/:tradeId/chat"
+                  element={
+                    <PrivateRoute>
+                      <TradeChat />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/phone/verify"
+                  element={
+                    <PrivateRoute>
+                      <PhoneVerify />
+                    </PrivateRoute>
+                  }
+                />
               </Routes>
             </Suspense>
           </Layout>

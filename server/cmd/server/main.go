@@ -90,6 +90,7 @@ func main() {
 	fishRepo := repository.NewFishRepository(db)
 	commRepo := repository.NewCommunityRepository(db)
 	mktRepo := repository.NewMarketplaceRepository(db)
+	chatRepo := repository.NewChatRepository(db)
 
 	// ── 사기 탐지기 ───────────────────────────────────────
 	fraudDetector := marketplace.NewFraudDetector(redisCache)
@@ -107,6 +108,10 @@ func main() {
 	fishSvc := service.NewFishService(fishRepo, redisCache)
 	commSvc := service.NewCommunityService(commRepo)
 	mktSvc := service.NewMarketplaceService(mktRepo, notifySvc, fraudDetector)
+
+	// ChatHub: Redis Pub/Sub 기반 실시간 채팅
+	chatHub := service.NewChatHub(rdb, chatRepo)
+	go chatHub.StartSubscriber(appCtx)
 
 	// ── AI Enricher (크롤러 파이프라인용) ─────────────────
 	aiEnricher := pipeline.NewAIEnricher(
@@ -141,11 +146,13 @@ func main() {
 	commH := handler.NewCommunityHandler(commSvc)
 	mktH := handler.NewMarketplaceHandler(mktSvc)
 	uploadH := handler.NewUploadHandler(minioClient, cfg.Storage.Bucket)
+	chatH := handler.NewChatHandler(chatHub, chatRepo)
+	phoneH := handler.NewPhoneHandler(db)
 
 	// ── Echo 라우터 설정 ───────────────────────────────────
 	e := echo.New()
 	e.HideBanner = true
-	router.Setup(e, cfg, authH, fishH, commH, mktH, uploadH)
+	router.Setup(e, cfg, authH, fishH, commH, mktH, uploadH, chatH, phoneH)
 	router.SetupHealthCheck(e, db, rdb)
 
 	// ── 그레이스풀 셧다운 ──────────────────────────────────

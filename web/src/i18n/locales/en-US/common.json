@@ -43,6 +43,31 @@
     "of": "of",
     "view_more": "View More"
   },
+  "chat": {
+    "title": "Trade Chat",
+    "connected": "Connected",
+    "connecting": "Connecting...",
+    "disconnected": "Disconnected",
+    "error": "Error",
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "hint": "Enter to send, Shift+Enter for new line",
+    "loading": "Loading chat history..."
+  },
+  "phone": {
+    "title": "Phone Verification",
+    "subtitle": "Phone verification is required for secure trading",
+    "label": "Phone Number",
+    "sendCode": "Send Code",
+    "sending": "Sending...",
+    "codeLabel": "Verification Code",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "done": "Verified!",
+    "doneSubtitle": "You can now trade without restrictions",
+    "goHome": "Go to Home",
+    "retry": "Re-enter number"
+  },
   "fish": {
     "scientific_name": "Scientific Name",
     "common_name": "Common Name",

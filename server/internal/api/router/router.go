@@ -22,6 +22,8 @@ func Setup(
 	commH *handler.CommunityHandler,
 	mktH *handler.MarketplaceHandler,
 	uploadH *handler.UploadHandler,
+	chatH *handler.ChatHandler,
+	phoneH *handler.PhoneHandler,
 ) {
 	// 글로벌 미들웨어
 	e.Use(echomw.Logger())
@@ -77,6 +79,15 @@ func Setup(
 	trades := api.Group("/trades", middleware.JWTAuth(cfg.Auth.JWTSecret))
 	trades.PUT("/:id/status", mktH.UpdateTradeStatus)
 	trades.POST("/:id/review", mktH.SubmitReview)
+
+	// WebSocket 채팅
+	trades.GET("/:id/chat", chatH.Connect)
+	trades.GET("/:id/chat/history", chatH.GetHistory)
+
+	// 전화번호 인증
+	phone := api.Group("/phone", middleware.JWTAuth(cfg.Auth.JWTSecret))
+	phone.POST("/send", phoneH.SendCode)
+	phone.POST("/verify", phoneH.VerifyCode)
 
 	// 어종 알림 구독
 	watches := api.Group("/watches", middleware.JWTAuth(cfg.Auth.JWTSecret))

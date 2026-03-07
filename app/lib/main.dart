@@ -14,6 +14,8 @@ import 'features/tanks/presentation/tanks_screen.dart';
 import 'features/auth/presentation/auth_provider.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/register_screen.dart';
+import 'features/auth/presentation/phone_verify_screen.dart';
+import 'features/chat/presentation/chat_screen.dart';
 import 'l10n/app_localizations.dart';
 
 const _supportedLocales = [
@@ -37,6 +39,10 @@ bool _requiresAuth(String location) {
   if (location == '/marketplace/create') return true;
   // /community/:boardId/create
   if (location.contains('/community/') && location.endsWith('/create')) return true;
+  // chat requires auth
+  if (location.contains('/trades/') && location.endsWith('/chat')) return true;
+  // phone verify requires auth
+  if (location == '/phone/verify') return true;
   return false;
 }
 
@@ -72,6 +78,13 @@ GoRouter _buildRouter(AuthChangeNotifier authNotifier, ProviderContainer contain
       // Auth routes (outside ShellRoute so they have no bottom nav)
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
+      GoRoute(path: '/phone/verify', builder: (_, __) => const PhoneVerifyScreen()),
+      GoRoute(
+        path: '/trades/:tradeId/chat',
+        builder: (_, state) => ChatScreen(
+          tradeId: state.pathParameters['tradeId']!,
+        ),
+      ),
 
       ShellRoute(
         builder: (context, state, child) => MainScaffold(child: child),

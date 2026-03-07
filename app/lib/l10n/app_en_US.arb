@@ -86,5 +86,21 @@
     "placeholders": {
       "count": { "type": "int" }
     }
-  }
+  },
+  "chatTitle": "Trade Chat",
+  "chatConnected": "Connected",
+  "chatConnecting": "Connecting...",
+  "chatDisconnected": "Disconnected",
+  "chatPlaceholder": "Type a message...",
+  "chatSend": "Send",
+  "chatEmpty": "Start a conversation",
+  "phoneVerifyTitle": "Phone Verification",
+  "phoneVerifySubtitle": "Phone verification is required for safe trading",
+  "phoneLabel": "Phone Number",
+  "phoneSendCode": "Send Verification Code",
+  "phoneCodeLabel": "6-digit Code",
+  "phoneVerify": "Verify",
+  "phoneVerifyDone": "Verified!",
+  "phoneVerifyDoneSubtitle": "You can now trade without restrictions",
+  "phoneRetry": "Re-enter Number"
 }
