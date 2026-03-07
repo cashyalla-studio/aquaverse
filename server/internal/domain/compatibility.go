@@ -1,22 +1,5 @@
 package domain
 
-// Tank 수조 정보
-type Tank struct {
-	ID        int64  `db:"id" json:"id"`
-	UserID    string `db:"user_id" json:"user_id"`
-	Name      string `db:"name" json:"name"`
-	VolumeL   *int   `db:"volume_l" json:"volume_l,omitempty"`
-	CreatedAt string `db:"created_at" json:"created_at"`
-}
-
-// TankInhabitant 수조 입주 어종
-type TankInhabitant struct {
-	TankID     int64  `db:"tank_id" json:"tank_id"`
-	FishDataID int64  `db:"fish_data_id" json:"fish_data_id"`
-	Quantity   int    `db:"quantity" json:"quantity"`
-	FishName   string `db:"fish_name" json:"fish_name,omitempty"` // JOIN 결과
-}
-
 // FishCompatibility 어종 호환성
 type FishCompatibility struct {
 	FishAID    int64  `db:"fish_a_id" json:"fish_a_id"`
