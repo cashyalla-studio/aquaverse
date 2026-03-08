@@ -1,0 +1,80 @@
+{
+  "app_name": "أكوافيرس",
+  "nav": {
+    "home": "الرئيسية",
+    "encyclopedia": "موسوعة الأسماك",
+    "community": "المجتمع",
+    "marketplace": "سوق التبني",
+    "my_tanks": "أحواضي",
+    "profile": "الملف الشخصي"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "register": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "forgot_password": "نسيت كلمة المرور؟"
+  },
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "search": "بحث",
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ ما",
+    "no_results": "لا توجد نتائج",
+    "page": "صفحة",
+    "of": "من",
+    "view_more": "عرض المزيد"
+  },
+  "fish": {
+    "scientific_name": "الاسم العلمي",
+    "common_name": "الاسم الشائع",
+    "family": "الفصيلة",
+    "care_level": "مستوى الرعاية",
+    "temperament": "الطبع",
+    "max_size": "الحجم الأقصى",
+    "tank_size": "الحد الأدنى لحجم الحوض",
+    "ph_range": "نطاق الحموضة",
+    "temp_range": "نطاق درجة الحرارة",
+    "diet": "النظام الغذائي",
+    "lifespan": "متوسط العمر",
+    "breeding": "التكاثر",
+    "care_notes": "ملاحظات الرعاية",
+    "humidity": "الرطوبة",
+    "uv_requirement": "إضاءة الأشعة فوق البنفسجية",
+    "basking_temp": "درجة حرارة التشمس",
+    "colony_size": "حجم المستعمرة",
+    "venom_level": "مستوى السمية",
+    "adult_size": "الحجم البالغ",
+    "legal_status": "الوضع القانوني",
+    "enclosure_type": "نوع الحظيرة",
+    "substrate_type": "نوع الركيزة",
+    "care_levels": {
+      "BEGINNER": "مبتدئ",
+      "INTERMEDIATE": "متوسط",
+      "EXPERT": "خبير"
+    },
+    "temperaments": {
+      "PEACEFUL": "هادئ",
+      "SEMI_AGGRESSIVE": "شبه عدواني",
+      "AGGRESSIVE": "عدواني"
+    },
+    "diet_types": {
+      "OMNIVORE": "آكل كل شيء",
+      "CARNIVORE": "آكل لحوم",
+      "HERBIVORE": "آكل نباتات"
+    }
+  },
+  "categories": {
+    "fish": "أسماك استوائية",
+    "reptile": "زواحف",
+    "amphibian": "برمائيات",
+    "insect": "حشرات",
+    "arachnid": "عنكبوتيات",
+    "bird": "طيور",
+    "mammal": "حيوانات صغيرة"
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "app_name": "아쿠아버스",
+  "nav": {
+    "home": "홈",
+    "encyclopedia": "생물 도감",
+    "community": "커뮤니티",
+    "marketplace": "분양마켓",
+    "my_tanks": "내 수조",
+    "profile": "프로필"
+  },
+  "auth": {
+    "login": "로그인",
+    "logout": "로그아웃",
+    "register": "회원가입",
+    "email": "이메일",
+    "password": "비밀번호",
+    "confirmPassword": "비밀번호 확인",
+    "nickname": "닉네임",
+    "locale": "언어 / 지역",
+    "forgotPassword": "비밀번호 찾기",
+    "forgot_password": "비밀번호 찾기",
+    "noAccount": "계정이 없으신가요?",
+    "hasAccount": "이미 계정이 있으신가요?",
+    "loginSuccess": "다시 오셨군요!",
+    "registerSuccess": "회원가입이 완료되었습니다!",
+    "loginError": "이메일 또는 비밀번호가 올바르지 않습니다.",
+    "registerError": "회원가입에 실패했습니다. 다시 시도해 주세요.",
+    "termsAgree": "다음에 동의합니다:",
+    "termsOfService": "서비스 이용약관",
+    "privacyPolicy": "개인정보처리방침",
+    "and": "및"
+  },
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "수정",
+    "search": "검색",
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "no_results": "결과가 없습니다",
+    "page": "페이지",
+    "of": "/",
+    "view_more": "더 보기"
+  },
+  "chat": {
+    "title": "거래 채팅",
+    "connected": "연결됨",
+    "connecting": "연결 중...",
+    "disconnected": "연결 끊김",
+    "error": "오류",
+    "placeholder": "메시지를 입력하세요...",
+    "send": "전송",
+    "hint": "Enter로 전송, Shift+Enter로 줄바꿈",
+    "loading": "채팅 기록 불러오는 중..."
+  },
+  "phone": {
+    "title": "전화번호 인증",
+    "subtitle": "안전한 거래를 위해 전화번호 인증이 필요합니다",
+    "label": "전화번호",
+    "sendCode": "인증번호 받기",
+    "sending": "발송 중...",
+    "codeLabel": "인증번호",
+    "verify": "인증 확인",
+    "verifying": "확인 중...",
+    "done": "인증 완료!",
+    "doneSubtitle": "이제 제한 없이 거래하실 수 있습니다",
+    "goHome": "홈으로 이동",
+    "retry": "번호 다시 입력"
+  },
+  "escrow": {
+    "title": "안전결제 (에스크로)",
+    "pending": "에스크로 대기",
+    "funded": "에스크로 보관 중",
+    "released": "대금 지급 완료",
+    "refunded": "환불 완료",
+    "disputed": "분쟁 중",
+    "fund": "에스크로 입금",
+    "release": "수령 확인 → 대금 지급",
+    "refund": "환불 요청",
+    "description": "플랫폼이 대금을 안전하게 보관하고 거래 완료 후 판매자에게 지급합니다."
+  },
+  "cites": {
+    "blocked": "CITES 보호종 — 거래 차단",
+    "warning": "CITES 보호종 — 주의 필요",
+    "invasiveKr": "한국 생태계 교란종 — 자연 방류 시 불법"
+  },
+  "pwa": {
+    "installTitle": "AquaVerse 설치",
+    "installDesc": "홈 화면에 추가하고 앱처럼 사용하세요",
+    "later": "나중에",
+    "install": "설치"
+  },
+  "fish": {
+    "scientific_name": "학명",
+    "common_name": "일반명",
+    "family": "과",
+    "care_level": "사육 난이도",
+    "temperament": "성격",
+    "max_size": "최대 크기",
+    "tank_size": "권장 수조",
+    "ph_range": "pH 범위",
+    "temp_range": "수온 범위",
+    "diet": "먹이",
+    "lifespan": "수명",
+    "breeding": "번식",
+    "care_notes": "사육 노트",
+    "humidity": "습도",
+    "uv_requirement": "UV 조명",
+    "basking_temp": "일광욕 온도",
+    "colony_size": "군체 크기",
+    "venom_level": "독성",
+    "adult_size": "성체 크기",
+    "legal_status": "법적 지위",
+    "enclosure_type": "사육장 종류",
+    "substrate_type": "바닥재",
+    "care_levels": {
+      "BEGINNER": "초급",
+      "INTERMEDIATE": "중급",
+      "EXPERT": "고급"
+    },
+    "temperaments": {
+      "PEACEFUL": "온순",
+      "SEMI_AGGRESSIVE": "반공격적",
+      "AGGRESSIVE": "공격적"
+    },
+    "diet_types": {
+      "OMNIVORE": "잡식",
+      "CARNIVORE": "육식",
+      "HERBIVORE": "초식"
+    }
+  },
+  "categories": {
+    "fish": "열대어",
+    "reptile": "파충류",
+    "amphibian": "양서류",
+    "insect": "곤충",
+    "arachnid": "거미류",
+    "bird": "조류",
+    "mammal": "소동물"
+  }
+}

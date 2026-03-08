@@ -209,10 +209,70 @@ func main() {
 	speciesIdentifySvc := service.NewSpeciesIdentifyService(db, cfg.AI.APIKey)
 	speciesH := handler.NewSpeciesIdentifyHandler(speciesIdentifySvc)
 
+	// 케어 허브 서비스 및 핸들러
+	careHubSvc := service.NewCareHubService(db)
+	careHubH := handler.NewCareHubHandler(careHubSvc)
+
+	// 뱃지 & 챌린지 서비스 및 핸들러
+	badgeSvc := service.NewBadgeService(db)
+	badgeH := handler.NewBadgeHandler(badgeSvc)
+
+	// RAG 챗봇 서비스 및 핸들러 (pgvector 기반)
+	ragSvc := service.NewRAGService(db, rdb)
+	ragH := handler.NewRAGHandler(ragSvc)
+
+	// 실시간 경매 서비스 및 핸들러
+	auctionSvc := service.NewAuctionService(db)
+	auctionH := handler.NewAuctionHandler(auctionSvc)
+
+	// Expert Connect 서비스 및 핸들러
+	expertSvc := service.NewExpertService(db)
+	expertH := handler.NewExpertHandler(expertSvc)
+
+	// Business Hub 재고 관리 서비스 및 핸들러
+	inventorySvc := service.NewInventoryService(db, citesRepo)
+	inventoryH := handler.NewInventoryHandler(inventorySvc)
+
+	// 다중 PSP 결제 서비스 V2 (Toss + Stripe)
+	paymentSvcV2 := service.NewPaymentServiceV2(db, cfg.Payment.TossSecretKey, cfg.Payment.StripeSecretKey, cfg.Payment.StripeWebhookSecret)
+
 	// ── Echo 라우터 설정 ───────────────────────────────────
 	e := echo.New()
 	e.HideBanner = true
-	router.Setup(e, cfg, rdb, authH, fishH, commH, mktH, uploadH, chatH, phoneH, metricsH, citesH, escrowH, compatH, tankDoctorH, paymentH, businessH, notifH, videoH, subH, sitemapH, adminH, socialH, totpH, speciesH)
+	deps := &router.AppDependencies{
+		AuthH:       authH,
+		FishH:       fishH,
+		CommH:       commH,
+		MktH:        mktH,
+		UploadH:     uploadH,
+		ChatH:       chatH,
+		PhoneH:      phoneH,
+		MetricsH:    metricsH,
+		CitesH:      citesH,
+		EscrowH:     escrowH,
+		CompatH:     compatH,
+		TankDoctorH: tankDoctorH,
+		PaymentH:    paymentH,
+		BusinessH:   businessH,
+		NotifH:      notifH,
+		VideoH:      videoH,
+		SubH:        subH,
+		SitemapH:    sitemapH,
+		AdminH:      adminH,
+		SocialH:     socialH,
+		TotpH:       totpH,
+		SpeciesH:    speciesH,
+		CareHubH:    careHubH,
+		BadgeH:      badgeH,
+		RAGH:        ragH,
+		AuctionH:    auctionH,
+		ExpertH:     expertH,
+		InventoryH:  inventoryH,
+		Cfg:         cfg,
+		Rdb:         rdb,
+	}
+	_ = paymentSvcV2 // PaymentServiceV2 초기화 완료 (향후 핸들러 마이그레이션 시 활용)
+	router.Setup(e, deps)
 	router.SetupHealthCheck(e, db, rdb)
 
 	// ── 그레이스풀 셧다운 ──────────────────────────────────

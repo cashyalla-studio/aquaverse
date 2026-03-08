@@ -1,13 +1,7 @@
 -- 수조 테이블 (기존 없음, 신규 생성)
-CREATE TABLE IF NOT EXISTS tanks (
-    id          BIGSERIAL PRIMARY KEY,
-    user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    name        VARCHAR(100) NOT NULL,
-    volume_l    INT,            -- 수조 용량 (리터)
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-CREATE INDEX idx_tanks_user ON tanks(user_id);
+-- tanks table already created in 001_initial_schema
+-- Just ensure the index exists
+CREATE INDEX IF NOT EXISTS idx_tanks_user ON tanks(owner_id);
 
 -- 수조 입주 어종
 CREATE TABLE IF NOT EXISTS tank_inhabitants (

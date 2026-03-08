@@ -36,7 +36,7 @@ services:
       --maxmemory 256mb
       --maxmemory-policy allkeys-lru
     ports:
-      - "6379:6379"
+      - "6380:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "devredis", "ping"]
       interval: 5s
@@ -65,7 +65,7 @@ services:
 
   # MinIO 버킷 초기화 (one-shot)
   minio-init:
-    image: minio/mc:RELEASE.2025-01-09T17-18-09Z
+    image: minio/mc:latest
     container_name: av_minio_init
     depends_on:
       minio:
@@ -111,7 +111,7 @@ services:
       minio-init:
         condition: service_completed_successfully
     ports:
-      - "8080:8080"
+      - "8090:8080"
     environment:
       # Viper는 AV_ 접두사 환경변수로 config.yaml을 오버라이드
       AV_SERVER_PORT: "8080"
@@ -159,7 +159,7 @@ services:
       dockerfile: Dockerfile.local
       args:
         # 브라우저가 직접 호스트의 8080으로 요청 (컨테이너 내부가 아닌 브라우저 기준)
-        VITE_API_URL: "http://localhost:8080"
+        VITE_API_URL: "http://localhost:8090"
     container_name: av_web
     environment:
       VITE_POSTHOG_KEY: phc_dev_local_placeholder
@@ -190,8 +190,6 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
-    networks:
-      - av_net
     restart: unless-stopped
 
   grafana:
@@ -211,8 +209,6 @@ services:
       - "3001:3000"
     depends_on:
       - prometheus
-    networks:
-      - av_net
     restart: unless-stopped
 
 volumes:

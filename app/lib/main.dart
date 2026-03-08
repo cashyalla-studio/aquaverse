@@ -17,6 +17,8 @@ import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/register_screen.dart';
 import 'features/auth/presentation/phone_verify_screen.dart';
 import 'features/chat/presentation/chat_screen.dart';
+import 'features/care/presentation/care_hub_screen.dart';
+import 'features/badges/presentation/badges_screen.dart';
 import 'l10n/app_localizations.dart';
 
 const _supportedLocales = [
@@ -44,6 +46,10 @@ bool _requiresAuth(String location) {
   if (location.contains('/trades/') && location.endsWith('/chat')) return true;
   // phone verify requires auth
   if (location == '/phone/verify') return true;
+  // care hub requires auth
+  if (location == '/care') return true;
+  // badges requires auth
+  if (location == '/badges') return true;
   return false;
 }
 
@@ -128,6 +134,8 @@ GoRouter _buildRouter(AuthChangeNotifier authNotifier, ProviderContainer contain
             ),
           ),
           GoRoute(path: '/tanks', builder: (_, __) => const TanksScreen()),
+          GoRoute(path: '/care', builder: (_, __) => const CareHubScreen()),
+          GoRoute(path: '/badges', builder: (_, __) => const BadgesScreen()),
         ],
       ),
     ],
@@ -271,12 +279,13 @@ class _MainScaffoldState extends State<MainScaffold> {
     (icon: Icons.forum_outlined, activeIcon: Icons.forum, path: '/community'),
     (icon: Icons.store_outlined, activeIcon: Icons.store, path: '/marketplace'),
     (icon: Icons.water_outlined, activeIcon: Icons.water, path: '/tanks'),
+    (icon: Icons.favorite_border_outlined, activeIcon: Icons.favorite, path: '/care'),
   ];
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final labels = [l10n.navHome, l10n.navEncyclopedia, l10n.navCommunity, l10n.navMarketplace, l10n.navMyTanks];
+    final labels = [l10n.navHome, l10n.navEncyclopedia, l10n.navCommunity, l10n.navMarketplace, l10n.navMyTanks, 'Care'];
 
     return Scaffold(
       body: widget.child,

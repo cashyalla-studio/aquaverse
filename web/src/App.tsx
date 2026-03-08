@@ -36,6 +36,8 @@ const SocialFeed = lazy(() => import('./pages/social/Feed'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'))
 const SpeciesIdentify = lazy(() => import('./pages/species/SpeciesIdentify'))
+const BadgesPage = lazy(() => import('./pages/BadgesPage'))
+const CareHub = lazy(() => import('./pages/CareHub'))
 
 const Spinner = () => (
   <div className="flex h-64 items-center justify-center">
@@ -117,6 +119,15 @@ export default function App() {
                   }
                 />
                 <Route path="/identify" element={<SpeciesIdentify />} />
+                <Route path="/badges" element={<BadgesPage />} />
+                <Route
+                  path="/care"
+                  element={
+                    <PrivateRoute>
+                      <CareHub />
+                    </PrivateRoute>
+                  }
+                />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route

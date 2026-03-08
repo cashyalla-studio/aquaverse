@@ -4,8 +4,12 @@
 
 @layer base {
   html {
-    font-family: 'Inter', 'Noto Sans', 'Noto Sans Arabic', 'Noto Sans Hebrew',
-      'Noto Sans SC', 'Noto Sans TC', 'Noto Sans JP', 'Noto Sans KR', system-ui, sans-serif;
+    font-family: 'Inter', 'Noto Sans KR', 'Noto Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900;
   }
 
   /* RTL 기본 스타일 */
@@ -15,19 +19,74 @@
   [dir='rtl'] .rtl-mirror {
     transform: scaleX(-1);
   }
+
+  /* 스크롤바 숨김 (카테고리 탭) */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer components {
+  /* 카드 */
   .card {
-    @apply bg-white rounded-xl shadow-sm;
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100;
   }
+  .card-hover {
+    @apply card hover:shadow-md hover:-translate-y-0.5 transition-all duration-200;
+  }
+
+  /* 버튼 */
   .btn-primary {
-    @apply bg-primary-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-600 transition-colors;
+    @apply bg-primary-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold
+           hover:bg-primary-600 active:scale-95 transition-all duration-150 shadow-sm;
   }
   .btn-secondary {
-    @apply border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors;
+    @apply border border-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-semibold
+           hover:bg-gray-50 active:scale-95 transition-all duration-150;
   }
+  .btn-ghost {
+    @apply text-gray-600 px-3 py-2 rounded-xl text-sm font-medium
+           hover:bg-gray-100 active:scale-95 transition-all duration-150;
+  }
+
+  /* 인풋 */
   .input {
-    @apply border border-gray-200 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-primary-300;
+    @apply border border-gray-200 rounded-xl px-4 py-2.5 text-sm w-full
+           focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent
+           bg-white placeholder:text-gray-400 transition-shadow;
+  }
+
+  /* 배지 */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  .badge-green  { @apply badge bg-emerald-100 text-emerald-700; }
+  .badge-yellow { @apply badge bg-amber-100 text-amber-700; }
+  .badge-red    { @apply badge bg-red-100 text-red-700; }
+  .badge-blue   { @apply badge bg-blue-100 text-blue-700; }
+  .badge-purple { @apply badge bg-purple-100 text-purple-700; }
+
+  /* 섹션 제목 */
+  .section-title {
+    @apply text-xl font-bold text-gray-900;
+  }
+  .section-subtitle {
+    @apply text-sm text-gray-500 mt-0.5;
+  }
+}
+
+@layer utilities {
+  /* 그라디언트 텍스트 */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-cyan-500 bg-clip-text text-transparent;
+  }
+
+  /* 유리 효과 */
+  .glass {
+    @apply bg-white/80 backdrop-blur-md;
   }
 }

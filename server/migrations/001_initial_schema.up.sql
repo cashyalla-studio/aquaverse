@@ -350,11 +350,8 @@ CREATE TABLE posts (
     is_deleted    BOOLEAN NOT NULL DEFAULT FALSE,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    deleted_at    TIMESTAMPTZ,
-    -- 게시판-로케일 일관성 보장
-    CONSTRAINT chk_post_locale_match CHECK (
-        locale = (SELECT locale FROM boards WHERE id = board_id)
-    )
+    deleted_at    TIMESTAMPTZ
+    -- 게시판-로케일 일관성은 애플리케이션 레이어에서 보장
 );
 
 CREATE INDEX idx_posts_board ON posts (board_id, is_deleted, created_at DESC);

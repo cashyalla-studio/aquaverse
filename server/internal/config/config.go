@@ -8,14 +8,15 @@ import (
 )
 
 type Config struct {
-	Server      ServerConfig
-	Database    DatabaseConfig
-	Redis       RedisConfig
-	Auth        AuthConfig
-	Storage     StorageConfig
-	AI          AIConfig
-	Crawler     CrawlerConfig
+	Server       ServerConfig
+	Database     DatabaseConfig
+	Redis        RedisConfig
+	Auth         AuthConfig
+	Storage      StorageConfig
+	AI           AIConfig
+	Crawler      CrawlerConfig
 	Notification NotificationConfig
+	Payment      PaymentConfig
 }
 
 type ServerConfig struct {
@@ -71,6 +72,14 @@ type NotificationConfig struct {
 	FromEmail    string `mapstructure:"from_email"`
 }
 
+// PaymentConfig 다중 PSP 결제 설정.
+// 환경변수: AV_PAYMENT_TOSS_SECRET_KEY, AV_PAYMENT_STRIPE_SECRET_KEY, AV_PAYMENT_STRIPE_WEBHOOK_SECRET
+type PaymentConfig struct {
+	TossSecretKey        string `mapstructure:"toss_secret_key"`        // TOSS_SECRET_KEY (기존 호환)
+	StripeSecretKey      string `mapstructure:"stripe_secret_key"`      // STRIPE_SECRET_KEY
+	StripeWebhookSecret  string `mapstructure:"stripe_webhook_secret"`  // STRIPE_WEBHOOK_SECRET
+}
+
 func Load() (*Config, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
@@ -97,6 +106,11 @@ func Load() (*Config, error) {
 	viper.SetDefault("crawler.gbif_api_base", "https://api.gbif.org/v1")
 	viper.SetDefault("crawler.requests_per_minute", 10)
 	viper.SetDefault("crawler.user_agent", "AquaVerse/1.0 (contact@aquaverse.app)")
+
+	// 결제 PSP 설정 기본값 — 미설정 시 mock 모드로 동작
+	viper.SetDefault("payment.toss_secret_key", "")
+	viper.SetDefault("payment.stripe_secret_key", "")
+	viper.SetDefault("payment.stripe_webhook_secret", "")
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {

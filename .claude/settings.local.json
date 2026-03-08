@@ -6,7 +6,20 @@
       "Bash(cmd.exe:*)",
       "Bash(go build:*)",
       "Bash(gh:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(PYTHONUTF8=1 python3:*)",
+      "Bash(grep -r \"\\\\\"github.com/cashyalla/aquaverse/internal/service\\\\\"\" \"E:/dev/fish/server/internal/repository/\" 2>/dev/null && echo \"found\" || echo \"not in repository\"\ngrep -r \"\\\\\"github.com/cashyalla/aquaverse/internal/repository\\\\\"\" \"E:/dev/fish/server/internal/service/\" 2>/dev/null | head -20)",
+      "Bash(grep:*)",
+      "Bash(\"E:/dev/fish/server/internal/domain/fish.go\":*)",
+      "Bash(\"E:/dev/fish/server/internal/domain/marketplace.go\":*)",
+      "Bash(powershell.exe:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker exec:*)",
+      "Bash(cp:*)",
+      "Bash(docker run:*)",
+      "Bash(docker network:*)"
     ]
   }
 }

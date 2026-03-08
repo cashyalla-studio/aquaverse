@@ -1,0 +1,142 @@
+{
+  "app_name": "AquaVerse",
+  "nav": {
+    "home": "Home",
+    "encyclopedia": "Species Encyclopedia",
+    "community": "Community",
+    "marketplace": "Adoption Market",
+    "my_tanks": "My Tanks",
+    "profile": "Profile"
+  },
+  "auth": {
+    "login": "Sign In",
+    "logout": "Sign Out",
+    "register": "Create Account",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "nickname": "Nickname",
+    "locale": "Language / Region",
+    "forgotPassword": "Forgot Password?",
+    "forgot_password": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginSuccess": "Welcome back!",
+    "registerSuccess": "Account created successfully!",
+    "loginError": "Invalid email or password.",
+    "registerError": "Registration failed. Please try again.",
+    "termsAgree": "I agree to the",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "and": "and"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "no_results": "No results found",
+    "page": "Page",
+    "of": "of",
+    "view_more": "View More"
+  },
+  "chat": {
+    "title": "Trade Chat",
+    "connected": "Connected",
+    "connecting": "Connecting...",
+    "disconnected": "Disconnected",
+    "error": "Error",
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "hint": "Enter to send, Shift+Enter for new line",
+    "loading": "Loading chat history..."
+  },
+  "phone": {
+    "title": "Phone Verification",
+    "subtitle": "Phone verification is required for secure trading",
+    "label": "Phone Number",
+    "sendCode": "Send Code",
+    "sending": "Sending...",
+    "codeLabel": "Verification Code",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "done": "Verified!",
+    "doneSubtitle": "You can now trade without restrictions",
+    "goHome": "Go to Home",
+    "retry": "Re-enter number"
+  },
+  "escrow": {
+    "title": "Secure Payment (Escrow)",
+    "pending": "Awaiting Escrow",
+    "funded": "Held in Escrow",
+    "released": "Payment Released",
+    "refunded": "Refund Completed",
+    "disputed": "Under Dispute",
+    "fund": "Deposit to Escrow",
+    "release": "Confirm Receipt → Release Payment",
+    "refund": "Request Refund",
+    "description": "The platform securely holds the payment and releases it to the seller upon trade completion."
+  },
+  "cites": {
+    "blocked": "CITES Protected Species — Trade Blocked",
+    "warning": "CITES Protected Species — Caution Required",
+    "invasiveKr": "Invasive Species in Korea — Illegal to Release into the Wild"
+  },
+  "pwa": {
+    "installTitle": "Install AquaVerse",
+    "installDesc": "Add to home screen and use like an app",
+    "later": "Later",
+    "install": "Install"
+  },
+  "fish": {
+    "scientific_name": "Scientific Name",
+    "common_name": "Common Name",
+    "family": "Family",
+    "care_level": "Care Level",
+    "temperament": "Temperament",
+    "max_size": "Max Size",
+    "tank_size": "Min Tank Size",
+    "ph_range": "pH Range",
+    "temp_range": "Temperature Range",
+    "diet": "Diet",
+    "lifespan": "Lifespan",
+    "breeding": "Breeding",
+    "care_notes": "Care Notes",
+    "humidity": "Humidity",
+    "uv_requirement": "UV Lighting",
+    "basking_temp": "Basking Temperature",
+    "colony_size": "Colony Size",
+    "venom_level": "Venom Level",
+    "adult_size": "Adult Size",
+    "legal_status": "Legal Status",
+    "enclosure_type": "Enclosure Type",
+    "substrate_type": "Substrate",
+    "care_levels": {
+      "BEGINNER": "Beginner",
+      "INTERMEDIATE": "Intermediate",
+      "EXPERT": "Expert"
+    },
+    "temperaments": {
+      "PEACEFUL": "Peaceful",
+      "SEMI_AGGRESSIVE": "Semi-Aggressive",
+      "AGGRESSIVE": "Aggressive"
+    },
+    "diet_types": {
+      "OMNIVORE": "Omnivore",
+      "CARNIVORE": "Carnivore",
+      "HERBIVORE": "Herbivore"
+    }
+  },
+  "categories": {
+    "fish": "Tropical Fish",
+    "reptile": "Reptiles",
+    "amphibian": "Amphibians",
+    "insect": "Insects",
+    "arachnid": "Arachnids",
+    "bird": "Birds",
+    "mammal": "Small Mammals"
+  }
+}

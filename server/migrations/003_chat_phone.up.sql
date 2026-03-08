@@ -40,8 +40,7 @@ CREATE UNIQUE INDEX idx_phone_verification_user ON user_phone_verifications(user
 ALTER TABLE users
     ADD COLUMN IF NOT EXISTS phone_number  VARCHAR(20),
     ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS account_age_days INT GENERATED ALWAYS AS
-        (EXTRACT(DAY FROM NOW() - created_at)::INT) STORED;
+    ADD COLUMN IF NOT EXISTS account_created_at_snapshot TIMESTAMPTZ;
 
 -- New account trade limit: 30,000 KRW cap for accounts < 30 days old & unverified phone
 CREATE TABLE IF NOT EXISTS new_account_trade_limits (

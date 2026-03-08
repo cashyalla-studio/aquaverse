@@ -59,7 +59,7 @@ export default function CommunityHome() {
                   )}
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-700">{board.post_count.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-gray-700">{(board.post_count ?? 0).toLocaleString()}</p>
                   <p className="text-xs text-gray-400">posts</p>
                 </div>
               </div>
