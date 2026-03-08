@@ -19,7 +19,9 @@
       "Bash(docker exec:*)",
       "Bash(cp:*)",
       "Bash(docker run:*)",
-      "Bash(docker network:*)"
+      "Bash(docker network:*)",
+      "Bash(docker restart:*)",
+      "Bash(docker images:*)"
     ]
   }
 }

@@ -93,7 +93,7 @@ func (r *FishRepository) List(ctx context.Context, filter domain.FishFilter) ([]
 		LIMIT $%d OFFSET $%d
 	`, shiftedWhere, limitIdx, offsetIdx)
 
-	var items []domain.FishListResponse
+	items := make([]domain.FishListResponse, 0)
 	if err := r.db.SelectContext(ctx, &items, q, finalArgs...); err != nil {
 		return nil, 0, err
 	}
@@ -147,7 +147,7 @@ func (r *FishRepository) Search(ctx context.Context, query string, locale domain
 			f.quality_score DESC
 		LIMIT 30
 	`
-	var items []domain.FishListResponse
+	items := make([]domain.FishListResponse, 0)
 	err := r.db.SelectContext(ctx, &items, ftsQ, string(locale), query)
 	if err == nil && len(items) > 0 {
 		return items, nil
@@ -185,7 +185,7 @@ func (r *FishRepository) Search(ctx context.Context, query string, locale domain
 			f.quality_score DESC
 		LIMIT 30
 	`
-	items = nil
+	items = make([]domain.FishListResponse, 0)
 	if err2 := r.db.SelectContext(ctx, &items, fallbackQ, string(locale), like, query); err2 != nil {
 		return nil, err2
 	}
@@ -302,6 +302,115 @@ func (r *FishRepository) UpdatePublishStatus(ctx context.Context, id int64, stat
 	q := `UPDATE fish_data SET publish_status = $1, quality_score = $2, updated_at = NOW() WHERE id = $3`
 	_, err := r.db.ExecContext(ctx, q, string(status), score, id)
 	return err
+}
+
+// CreateCrawlJob 새 CrawlJob 레코드를 생성하고 ID와 created_at을 채워준다.
+func (r *FishRepository) CreateCrawlJob(ctx context.Context, job *domain.CrawlJob) error {
+	q := `INSERT INTO crawl_jobs (source_name, source_url, job_type, status)
+          VALUES ($1, $2, $3, 'PENDING') RETURNING id, created_at`
+	return r.db.QueryRowContext(ctx, q, job.SourceName, job.SourceURL, job.JobType).
+		Scan(&job.ID, &job.CreatedAt)
+}
+
+// UpdateCrawlJob CrawlJob 의 상태 및 카운트 필드를 갱신한다.
+func (r *FishRepository) UpdateCrawlJob(ctx context.Context, job *domain.CrawlJob) error {
+	q := `UPDATE crawl_jobs SET status=$1, items_found=$2, items_processed=$3,
+          items_failed=$4, error_message=$5, started_at=$6, completed_at=$7
+          WHERE id=$8`
+	_, err := r.db.ExecContext(ctx, q, job.Status, job.ItemsFound, job.ItemsProcessed,
+		job.ItemsFailed, job.ErrorMessage, job.StartedAt, job.CompletedAt, job.ID)
+	return err
+}
+
+// ListCrawlJobs 최신 CrawlJob 목록을 created_at 내림차순으로 반환한다.
+func (r *FishRepository) ListCrawlJobs(ctx context.Context, limit int) ([]domain.CrawlJob, error) {
+	var jobs []domain.CrawlJob
+	q := `SELECT * FROM crawl_jobs ORDER BY created_at DESC LIMIT $1`
+	return jobs, r.db.SelectContext(ctx, &jobs, q, limit)
+}
+
+// TranslationStat 로케일별 번역 완료 수
+type TranslationStat struct {
+	Locale string `db:"locale" json:"locale"`
+	Count  int64  `db:"count"  json:"count"`
+}
+
+// PipelineStats 파이프라인 전체 통계
+type PipelineStats struct {
+	TotalSpecies     int64             `json:"total_species"`
+	Published        int64             `json:"published"`
+	Draft            int64             `json:"draft"`
+	Rejected         int64             `json:"rejected"`
+	PendingCrawl     int64             `json:"pending_crawl"`
+	TranslationStats []TranslationStat `json:"translation_stats"`
+}
+
+// GetPipelineStats 파이프라인 통계를 조회한다.
+func (r *FishRepository) GetPipelineStats(ctx context.Context) (*PipelineStats, error) {
+	// fish_data 집계
+	type fishCounts struct {
+		TotalSpecies int64 `db:"total_species"`
+		Published    int64 `db:"published"`
+		Draft        int64 `db:"draft"`
+		Rejected     int64 `db:"rejected"`
+	}
+	var fc fishCounts
+	fishQ := `
+		SELECT
+			COUNT(*) AS total_species,
+			COUNT(*) FILTER (WHERE publish_status = 'PUBLISHED') AS published,
+			COUNT(*) FILTER (WHERE publish_status = 'DRAFT') AS draft,
+			COUNT(*) FILTER (WHERE publish_status = 'REJECTED') AS rejected
+		FROM fish_data
+	`
+	if err := r.db.GetContext(ctx, &fc, fishQ); err != nil {
+		return nil, err
+	}
+
+	// raw_crawl_data PENDING 수
+	var pendingCrawl int64
+	pendingQ := `SELECT COUNT(*) FROM raw_crawl_data WHERE parse_status = 'PENDING'`
+	if err := r.db.GetContext(ctx, &pendingCrawl, pendingQ); err != nil {
+		return nil, err
+	}
+
+	// 로케일별 번역 완료 수
+	var tStats []TranslationStat
+	transQ := `SELECT locale, COUNT(*) AS count FROM fish_translations GROUP BY locale ORDER BY count DESC`
+	if err := r.db.SelectContext(ctx, &tStats, transQ); err != nil {
+		return nil, err
+	}
+
+	stats := &PipelineStats{
+		TotalSpecies:     fc.TotalSpecies,
+		Published:        fc.Published,
+		Draft:            fc.Draft,
+		Rejected:         fc.Rejected,
+		PendingCrawl:     pendingCrawl,
+		TranslationStats: tStats,
+	}
+	return stats, nil
+}
+
+// ListPublishedFish PUBLISHED 상태의 어종 목록을 반환한다. (번역 CLI용)
+func (r *FishRepository) ListPublishedFish(ctx context.Context, limit, offset int) ([]domain.FishData, error) {
+	var items []domain.FishData
+	q := `SELECT * FROM fish_data WHERE publish_status = 'PUBLISHED' ORDER BY id ASC LIMIT $1 OFFSET $2`
+	return items, r.db.SelectContext(ctx, &items, q, limit, offset)
+}
+
+// ListExistingTranslationLocales fish_data_id에 대해 이미 존재하는 번역 로케일 목록을 반환한다.
+func (r *FishRepository) ListExistingTranslationLocales(ctx context.Context, fishDataID int64) ([]domain.Locale, error) {
+	var locales []string
+	q := `SELECT locale FROM fish_translations WHERE fish_data_id = $1`
+	if err := r.db.SelectContext(ctx, &locales, q, fishDataID); err != nil {
+		return nil, err
+	}
+	result := make([]domain.Locale, 0, len(locales))
+	for _, l := range locales {
+		result = append(result, domain.Locale(l))
+	}
+	return result, nil
 }
 
 // shiftParamIndices WHERE 절의 PostgreSQL 파라미터 인덱스($N)를 shift만큼 증가시킨다.

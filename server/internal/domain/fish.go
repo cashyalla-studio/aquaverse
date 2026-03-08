@@ -212,16 +212,16 @@ type RawCrawlData struct {
 
 // FishListResponse API 응답용
 type FishListResponse struct {
-	ID                int64     `json:"id"`
-	ScientificName    string    `json:"scientific_name"`
-	CommonName        string    `json:"common_name"`
-	Family            string    `json:"family"`
-	CareLevel         *string   `json:"care_level,omitempty"`
-	Temperament       *string   `json:"temperament,omitempty"`
-	MaxSizeCm         *float64  `json:"max_size_cm,omitempty"`
-	MinTankSizeLiters *int      `json:"min_tank_size_liters,omitempty"`
-	PrimaryImageURL   *string   `json:"primary_image_url,omitempty"`
-	QualityScore      float64   `json:"quality_score"`
+	ID                int64    `db:"id"                  json:"id"`
+	ScientificName    string   `db:"scientific_name"     json:"scientific_name"`
+	CommonName        string   `db:"common_name"         json:"common_name"`
+	Family            string   `db:"family"              json:"family"`
+	CareLevel         *string  `db:"care_level"          json:"care_level,omitempty"`
+	Temperament       *string  `db:"temperament"         json:"temperament,omitempty"`
+	MaxSizeCm         *float64 `db:"max_size_cm"         json:"max_size_cm,omitempty"`
+	MinTankSizeLiters *int     `db:"min_tank_size_liters" json:"min_tank_size_liters,omitempty"`
+	PrimaryImageURL   *string  `db:"primary_image_url"   json:"primary_image_url,omitempty"`
+	QualityScore      float64  `db:"quality_score"       json:"quality_score"`
 }
 
 // FishFilter 어종 목록 필터

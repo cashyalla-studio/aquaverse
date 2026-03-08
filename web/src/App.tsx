@@ -35,6 +35,7 @@ const SubscriptionPage = lazy(() => import('./pages/subscription/SubscriptionPag
 const SocialFeed = lazy(() => import('./pages/social/Feed'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'))
+const PipelinePage = lazy(() => import('./pages/admin/PipelinePage'))
 const SpeciesIdentify = lazy(() => import('./pages/species/SpeciesIdentify'))
 const BadgesPage = lazy(() => import('./pages/BadgesPage'))
 const CareHub = lazy(() => import('./pages/CareHub'))
@@ -115,6 +116,14 @@ export default function App() {
                   element={
                     <PrivateRoute>
                       <AdminUsers />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/admin/pipeline"
+                  element={
+                    <PrivateRoute>
+                      <PipelinePage />
                     </PrivateRoute>
                   }
                 />

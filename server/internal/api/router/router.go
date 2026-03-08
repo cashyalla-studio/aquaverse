@@ -45,6 +45,7 @@ type AppDependencies struct {
 	AuctionH    *handler.AuctionHandler
 	ExpertH     *handler.ExpertHandler
 	InventoryH  *handler.InventoryHandler
+	PipelineH   *handler.PipelineHandler
 	Cfg         *config.Config
 	Rdb         *redis.Client
 }
@@ -219,6 +220,13 @@ func Setup(e *echo.Echo, deps *AppDependencies) {
 	admin.POST("/users/:id/unban", deps.AdminH.UnbanUser)
 	admin.GET("/audit-logs", deps.AdminH.GetAuditLogs)
 	admin.GET("/cites-stats", deps.AdminH.GetCitesStats)
+
+	// ── 파이프라인 관리 ─────────────────────────────────────
+	admin.GET("/pipeline/stats", deps.PipelineH.GetStats)
+	admin.POST("/pipeline/process", deps.PipelineH.TriggerProcess)
+	admin.POST("/pipeline/enrich", deps.PipelineH.TriggerEnrich)
+	admin.POST("/pipeline/translate", deps.PipelineH.TriggerTranslate)
+	admin.GET("/pipeline/jobs", deps.PipelineH.ListJobs)
 
 	// ── 소셜 그래프 ─────────────────────────────────────
 	social := api.Group("/social", middleware.JWTAuth(cfg.Auth.JWTSecret))

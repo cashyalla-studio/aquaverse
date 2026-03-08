@@ -170,7 +170,7 @@ services:
     ports:
       - "3000:80"
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:80/ || exit 1"]
       interval: 10s
       timeout: 3s
       start_period: 5s

@@ -139,7 +139,8 @@ func main() {
 	fishbaseClient := crawler.NewFishBaseClient(
 		logger, cfg.Crawler.UserAgent, cfg.Crawler.RequestsPerMinute,
 	)
-	scheduler := crawler.NewScheduler(fishbaseClient, pipelineProcessor, logger)
+	_ = fishbaseClient // FishBaseClient는 cmd/crawler에서 SourceAdapter로 사용됨
+	scheduler := crawler.NewSchedulerLegacy(nil, pipelineProcessor, logger)
 	scheduler.Start()
 	defer scheduler.Stop()
 
@@ -233,6 +234,9 @@ func main() {
 	inventorySvc := service.NewInventoryService(db, citesRepo)
 	inventoryH := handler.NewInventoryHandler(inventorySvc)
 
+	// 파이프라인 관리 핸들러
+	pipelineH := handler.NewPipelineHandler(fishRepo, pipelineProcessor, logger)
+
 	// 다중 PSP 결제 서비스 V2 (Toss + Stripe)
 	paymentSvcV2 := service.NewPaymentServiceV2(db, cfg.Payment.TossSecretKey, cfg.Payment.StripeSecretKey, cfg.Payment.StripeWebhookSecret)
 
@@ -268,6 +272,7 @@ func main() {
 		AuctionH:    auctionH,
 		ExpertH:     expertH,
 		InventoryH:  inventoryH,
+		PipelineH:   pipelineH,
 		Cfg:         cfg,
 		Rdb:         rdb,
 	}

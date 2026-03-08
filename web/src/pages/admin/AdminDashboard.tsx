@@ -43,6 +43,9 @@ export default function AdminDashboard() {
         <Link to="/admin/cites" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
           CITES 통계
         </Link>
+        <Link to="/admin/pipeline" className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+          파이프라인
+        </Link>
       </div>
 
       {/* KPI 그리드 */}
